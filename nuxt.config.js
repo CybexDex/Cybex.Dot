@@ -61,7 +61,7 @@ export default {
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
-    '@nuxtjs/pwa',
+    // '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv'
   ],
@@ -105,7 +105,19 @@ export default {
    */
   build: {
     transpile: [/^vuetify/],
-
+    extractCSS: true,
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          styles: {
+            name: 'style',
+            test: /\.(scss|css)$/,
+            chunks: 'all',
+            enforce: true
+          }
+        }
+      }
+    },
     cssSourceMap: false,
     /*
      ** You can extend webpack config here
