@@ -1,0 +1,213 @@
+// size-settings
+$btn-tiny: (
+  height: 24px,
+  fontSize: 12px
+);
+$btn-small: (
+  height: 32px,
+  fontSize: 12px
+);
+$btn-normal: (
+  height: 40px,
+  fontSize: 14px
+);
+$btn-middle: (
+  height: 48px,
+  fontSize: 16px
+);
+$btn-large: (
+  height: 56px,
+  fontSize: 16px
+);
+// color settings
+$btn-major: (
+  bgImage: map-get($gradients, goldex),
+  bgColor: map-get($main, orange),
+  color: map-get($main, white),
+  hoverColor: map-get($main, white)
+);
+$btn-minor: (
+  bgColor: map-get($main, anchor),
+  color: map-get($main, grey),
+  hoverColor: map-get($main, white),
+  hoverBgColor: map-get($main, independence)
+);
+$btn-pre-minor: (
+  bgColor: map-get($main, independence),
+  color: map-get($main, grey),
+  hoverColor: map-get($main, white),
+  hoverBgColor: map-get($main, independence)
+);
+$btn-minimal: (
+  bgColor: rgba(map-get($main, white), 0.1),
+  color: map-get($main, white),
+  hoverColor: map-get($main, white),
+  hoverBgColor: rgba(map-get($main, white), 0.3),
+  pressBgColor: rgba(map-get($main, white), 0.2)
+);
+$btn-icon-small: (
+  width: 24px,
+  height: 24px
+);
+$btn-icon-normal: (
+  width: 32px,
+  height: 32px
+);
+// TODO: icon样式
+// $icon ?= {
+// bgImage: $gradients.anchor,
+// color: $main.grey,
+// hoverColor: $main.white
+// };
+// $iconClean ?= {
+// color: $main.grey,
+// hoverColor: $main.orange
+// }
+
+// mixin
+@mixin theme-btn($size, $theme: 'cybex-dark') {
+  $m: (
+    'tiny': $btn-tiny,
+    'small': $btn-small,
+    'normal': $btn-normal,
+    'middle': $btn-middle,
+    'large': $btn-large
+  );
+  $sizeVar: map-get($m, $size);
+
+  // size
+  &.#{$size}-size {
+    height: map-get($sizeVar, height);
+    font-size: map-get($sizeVar, fontSize);
+  }
+}
+
+@mixin theme-btn-icon($size, $theme: 'cybex-dark') {
+  $m: (
+    'small': $btn-icon-small,
+    'normal': $btn-icon-normal
+  );
+  $sizeVar: map-get($m, $size);
+  &.#{$size}-size {
+    width: map-get($sizeVar, width);
+    height: map-get($sizeVar, height);
+  }
+}
+
+@mixin theme-btn-color($c) {
+  $m: (
+    'major': $btn-major,
+    'pre-minor': $btn-pre-minor,
+    'minor': $btn-minor,
+    'minimal': $btn-minimal
+  );
+  $colorVar: map-get($m, $c);
+
+  &.#{$c}--text:not(.v-btn--icon):not(.v-btn--flat),
+  &.#{$c}:not(.v-btn--icon):not(.v-btn--flat) {
+    @if (map-get($colorVar, bgColor)) {
+      background-color: map-get($colorVar, bgColor);
+    }
+
+    @if (map-get($colorVar, bgImage)) {
+      background-image: map-get($colorVar, bgImage);
+    }
+
+    color: map-get($colorVar, color);
+
+    &:not(.v-btn--disabled):hover {
+      &:before {
+        background-color: map-get($colorVar, bgColor);
+      }
+
+      @if (map-get($colorVar, hoverColor)) {
+        color: map-get($colorVar, hoverColor);
+      }
+
+      @if (map-get($colorVar, hoverBgColor)) {
+        background-color: map-get($colorVar, hoverBgColor);
+      }
+    }
+
+    &:active {
+      @if (map-get($colorVar, pressBgColor)) {
+        background: map-get($colorVar, pressBgColor);
+      }
+    }
+  }
+}
+
+// mixin end
+.v-btn {
+  &.theme--cybex-dark {
+    @include f-cybex-style(heavy);
+    text-transform: capitalize;
+    margin: 0;
+    padding: 0 16px;
+    border-radius: 4px;
+    width: auto;
+    transition: none !important;
+    box-shadow: none !important;
+
+    &.v-btn--block {
+      width: 100%;
+    }
+    &.v-btn--active:before,
+    &.v-btn:hover:before,
+    &.v-btn:focus:before {
+      background-color: transparent;
+    }
+    // disabled
+    &.v-btn--disabled {
+      pointer-events: visible;
+      cursor: not-allowed;
+      color: rgba(map-get($main, grey), 0.3) !important;
+
+      // overwrite vuetify theme
+      &:not(.v-btn--icon):not(.v-btn--flat):not(.v-btn--outline) {
+        background-color: rgba(map-get($main, grey), 0.3) !important;
+        background-image: none !important;
+      }
+    }
+
+    @each $s in 'tiny', 'small', 'normal', 'middle', 'large' {
+      @include theme-btn($s);
+    }
+    @each $color in 'major', 'pre-minor', 'minor', 'minimal' {
+      @include theme-btn-color($color);
+    }
+
+    // icons
+    &.v-btn--icon {
+      background: map-get($main, anchor);
+      border-radius: 4px;
+
+      .v-icon {
+        &:before {
+          color: map-get($main, grey);
+        }
+      }
+
+      &:hover {
+        background: map-get($main, independence);
+        .v-icon {
+          &:before {
+            color: map-get($main, white);
+          }
+        }
+      }
+
+      &.v-btn--disabled {
+        pointer-events: visible;
+        cursor: not-allowed;
+        .v-icon {
+          opacity: 0.3;
+        }
+      }
+
+      @each $size in 'small', 'normal' {
+        @include theme-btn-icon($size);
+      }
+    }
+  }
+}

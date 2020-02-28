@@ -1,0 +1,34 @@
+@import '~/assets/style/_vars/_colors';
+
+.c-error {
+  color: map-get($main, error) !important;
+}
+.c-buy {
+  color: $exchange-buy !important;
+}
+
+.c-sell {
+  color: $exchange-sell !important;
+}
+
+.c-white-30 {
+  color: rgba(map-get($main, white), 0.5) !important;
+}
+
+.c-white-80 {
+  color: rgba(map-get($main, white), 0.8) !important;
+}
+
+.c-highlight {
+  color: map-get($main, orange) !important;
+}
+.c-cancel-order {
+  color: rgba(map-get($main, white), 0.5) !important;
+}
+.c-grey {
+  color: map-get($main, grey) !important;
+}
+
+.c-custom-coin {
+  color: map-get($main, hover) !important;
+}

@@ -1,0 +1,46 @@
+{
+  "name": "cybexDotDex",
+  "version": "1.0.0",
+  "description": "Cybex on Substrate",
+  "author": "koofrank",
+  "private": true,
+  "scripts": {
+    "dev": "PORT=3006 nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
+  },
+  "dependencies": {
+    "@nuxtjs/axios": "^5.3.6",
+    "@nuxtjs/dotenv": "^1.4.0",
+    "@nuxtjs/pwa": "^3.0.0-0",
+    "@polkadot/api": "^1.3.1",
+    "@polkadot/extension-dapp": "^0.21.1",
+    "bignumber.js": "^9.0.0",
+    "jdenticon": "^2.2.0",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.27",
+    "nuxt": "^2.2.13",
+    "sha256": "^0.2.0",
+    "vue-i18n": "^8.15.3",
+    "vue2-filters": "^0.9.1",
+    "vue2-perfect-scrollbar": "^1.3.0",
+    "vuejs-logger": "^1.5.4"
+  },
+  "devDependencies": {
+    "@nuxtjs/eslint-config": "^2.0.0",
+    "@nuxtjs/eslint-module": "^1.0.0",
+    "@nuxtjs/vuetify": "^1.11.0",
+    "babel-eslint": "^10.0.1",
+    "deepmerge": "^4.2.2",
+    "eslint": "^6.1.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-nuxt": ">=0.4.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "fibers": "^4.0.2",
+    "prettier": "^1.19.1",
+    "sass": "^1.25.0"
+  }
+}

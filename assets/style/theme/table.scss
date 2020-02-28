@@ -1,0 +1,254 @@
+$table-small: (
+  height: 24px,
+  font-size: 12px,
+  color: rgba(map-get($main, white), 0.8),
+  padding: 0px 8px
+);
+
+$table-middle: (
+  height: 32px,
+  font-size: 12px,
+  color: rgba(map-get($main, white), 0.8),
+  padding: 2px 8px 0
+);
+
+$table-large: (
+  height: 56px,
+  font-size: 12px,
+  color: rgba(map-get($main, white), 0.8),
+  padding: 0px 8px
+);
+
+@mixin theme-cybex-table($size) {
+  $m: (
+    small: $table-small,
+    middle: $table-middle,
+    large: $table-large
+  );
+
+  $sizeVar: map-get($m, $size);
+  @if $sizeVar == null {
+    $sizeVar: $table-middle;
+  }
+
+  .cybex {
+    .#{$size}-size-table {
+      position: relative;
+      .fixed-header {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        height: map-get($sizeVar, height);
+        align-items: center;
+        font-size: map-get($sizeVar, font-size);
+        .col-header {
+          padding: map-get($sizeVar, padding);
+        }
+      }
+
+      .v-data-table.theme--dark {
+        thead {
+          tr {
+            height: map-get($sizeVar, height);
+          }
+          th {
+            padding: map-get($sizeVar, padding);
+            &.column.sortable {
+              line-height: map-get($sizeVar, height);
+            }
+          }
+        }
+        tbody {
+          tr:not(.v-datatable__expand-row) {
+            height: map-get($sizeVar, height);
+          }
+          td {
+            height: map-get($sizeVar, height);
+            font-size: map-get($sizeVar, font-size);
+            color: map-get($sizeVar, color);
+            padding: map-get($sizeVar, padding);
+          }
+        }
+      }
+    }
+  }
+}
+
+@each $size in 'small', 'middle', 'large' {
+  @include theme-cybex-table($size);
+}
+.cybex {
+  .fixed-header {
+    position: absolute;
+    z-index: 1;
+    color: rgba(map-get($main, white), 0.5);
+    background: map-get($main, lead);
+    width: 100%;
+    line-height: 1;
+    .desc .v-icon {
+      transform: rotate(-180deg);
+    }
+    .v-icon {
+      margin-left: 4px;
+    }
+  }
+  // empty
+  .empty-table {
+    .v-table.theme--dark tbody tr:hover {
+      background-color: map-get($main, lead) !important;
+      td {
+        color: rgba(map-get($main, white), 0.8);
+      }
+    }
+  }
+  // 透明背景
+  // 透明背景用样式
+  .transparent-bg .v-table.theme--dark {
+    background-color: transparent !important;
+    thead tr {
+      height: 40px;
+    }
+    thead th:first-child,
+    tbody td:first-child {
+      padding: 0 24px 0 8px;
+    }
+
+    tbody {
+      tr {
+        &:hover,
+        &.expand-row {
+          background-color: #232a38 !important;
+          color: map-get($main, white);
+        }
+      }
+      // expand content
+      .v-datatable__expand-content {
+        max-width: 100%;
+        padding: 8px 36px;
+        background: map-get($main, lead);
+        color: map-get($main, white);
+        height: 60px;
+        display: flex;
+        align-items: center;
+        line-height: 20px;
+        @include f-cybex-style(medium);
+        overflow: auto;
+        word-break: break-all;
+      }
+    }
+  }
+  .v-data-table {
+    &.theme--dark {
+      // 通用样式
+      background-color: map-get($main, lead) !important;
+      thead {
+        tr:first-child {
+          border-bottom: none;
+        }
+        th,
+        th.column.sortable.active {
+          color: rgba(map-get($main, white), 0.5);
+          .v-icon {
+            margin-left: 4px;
+          }
+          &.text-xs-left {
+            &.text-right {
+              text-align: right !important;
+              // padding-right: 0;
+            }
+          }
+          // &.text-xs-right {
+          //   // padding-right: 0
+          // }
+        }
+      }
+      tbody {
+        // tr
+        tr {
+          &:hover {
+            td:first-child {
+              border-top-left-radius: 4px;
+              border-bottom-left-radius: 4px;
+            }
+            td:last-child {
+              border-top-right-radius: 4px;
+              border-bottom-right-radius: 4px;
+            }
+          }
+          &:not(:last-child) {
+            border-bottom: 0 !important;
+          }
+          &:not(.v-datatable__expand-row):not(:last-child) {
+            box-shadow: inset 0 -1px 0 0 rgba(map-get($main, noir), 0.2);
+          }
+          &:hover {
+            background: rgba(map-get($main, white), 0.04) !important;
+            td {
+              color: rgba(map-get($main, white), 1);
+            }
+          }
+        }
+
+        // td
+        td {
+          @include f-cybex-style(heavy);
+          color: rgba(map-get($main, white), 0.8);
+          .explorer-link {
+            color: map-get($main, grey);
+          }
+        }
+      }
+      // 通用样式结束
+    }
+  }
+  // 用于 table 上下方的布局与分页
+  // 上方按钮 下方分页
+  .v-toolbar {
+    &.data-table-toolbar {
+      &.theme--dark {
+        background: transparent;
+        box-shadow: none;
+        color: rgba(map-get($main, white), 0.4);
+        font-size: 12px;
+        .v-toolbar__content {
+          padding: 0 8px;
+          height: 48px;
+          .page-count-label {
+            color: rgba(map-get($main, white), 0.5);
+          }
+
+          .v-pagination {
+            .v-pagination__more {
+              width: 24px;
+              height: 24px;
+              padding: 8px;
+            }
+            .v-pagination__navigation {
+              background: transparent !important;
+              box-shadow: none;
+              border: none !important;
+              outline: none !important;
+            }
+            .v-pagination__item {
+              border: none !important;
+              outline: none !important;
+              width: 24px;
+              min-width: 24px;
+              margin: 8px;
+              height: 24px;
+              background: transparent !important;
+              font-size: 10px;
+              line-height: 24px;
+              box-shadow: none;
+              color: map-get($main, grey);
+              &.v-pagination__item--active {
+                color: rgba(map-get($main, orange), 0.8);
+                background: rgba(map-get($main, white), 0.04) !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

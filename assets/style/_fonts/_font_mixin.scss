@@ -1,0 +1,46 @@
+// 生成对应字体样式
+@import '~/assets/style/_fonts/_font_variables';
+
+@mixin f-cybex-base($name, $os: 'mac') {
+  $cbName: 'cybex-' + $name;
+  $zh-name: 'PingFangSC-Regular';
+  $weight: map-get($fontWeight, $name);
+  // @debug 'weight: --------#{$name}, #{$weight}';
+
+  // windows不适用Avenir字体渲染
+  @if $os == 'windows' {
+    $weight: map-get($fontWeight, $name + '-' + $os);
+  }
+
+  @if $weight == 'bold' {
+    $zh-name: 'PingFangSC-Medium'; //,  "Microsoft Yahei Bold"
+  }
+  @if $weight == 'bolder' {
+    $zh-name: 'PingFangSC-Semibold'; //, "Microsoft Yahei Bold"
+  }
+  @if type-of($weight) == 'number' and $weight <= 400 {
+    $zh-name: 'PingFangSC-Light'; //, "Microsoft Yahei Light"
+  }
+
+  $f-family: $cbName, $zh-name, 'Arial', 'sans-serif' !important;
+  @if $os == 'windows' {
+    $f-family: $zh-name, 'Arial', 'sans-serif' !important;
+  }
+
+  font-family: $f-family;
+  font-weight: $weight;
+  -webkit-font-smoothing: antialiased;
+}
+/**
+  * @param name 默认mac下字体样式
+  * @param adjustName windows下字体样式
+**/
+@mixin f-cybex-style($name, $adjustName: '') {
+  @include f-cybex-base($name);
+  .os-windows & {
+    @if $adjustName == '' {
+      $adjustName: $name;
+    }
+    @include f-cybex-base($adjustName, 'windows');
+  }
+}

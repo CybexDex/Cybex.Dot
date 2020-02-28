@@ -1,0 +1,13 @@
+// font
+@import '~/assets/style/_fonts';
+
+// // variable override
+@import '~/assets/style/_vars';
+
+@import '~vuetify/src/styles/styles.sass';
+
+// // base
+@import '~/assets/style/base';
+
+// // overwrite vuetify component theme
+@import '~/assets/style/theme';
