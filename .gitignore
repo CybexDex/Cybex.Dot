@@ -74,6 +74,9 @@ dist
 # vuepress build output
 .vuepress/dist
 
+# trading view exclude
+!static/datafeeds/udf/dist
+
 # Serverless directories
 .serverless
 
