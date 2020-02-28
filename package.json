@@ -5,9 +5,9 @@
   "author": "koofrank",
   "private": true,
   "scripts": {
-    "dev": "PORT=3006 nuxt",
+    "dev": "cross-env NUXT_HOST=127.0.0.1 NUXT_PORT=3006 nuxt",
     "build": "nuxt build",
-    "start": "nuxt start",
+    "start": "cross-env NUXT_HOST=0.0.0.0 NUXT_PORT=3333 nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
   },
@@ -34,6 +34,7 @@
     "@nuxtjs/eslint-module": "^1.0.0",
     "@nuxtjs/vuetify": "^1.11.0",
     "babel-eslint": "^10.0.1",
+    "cross-env": "^7.0.0",
     "deepmerge": "^4.2.2",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.10.0",
