@@ -35,14 +35,12 @@
           }"
         >
           <v-flex class="data d-flex mr-1">
-            {{ Math.abs(activityData.absolute_change) }}
+            --
             <span v-if="activityData.percent_change > 0" class="ic-arrow_up" />
             <span
               v-if="activityData.percent_change < 0"
               class="ic-arrow_drop_down"
             />
-            {{ activityData.percent_change > 0 ? '+' : '-'
-            }}{{ Math.abs(activityData.percent_change) }}%
           </v-flex>
           <span v-if="currentIsUp === false" class="ic-arrow_drop_down" />
         </div>
