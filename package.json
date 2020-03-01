@@ -5,9 +5,11 @@
   "author": "koofrank",
   "private": true,
   "scripts": {
-    "dev": "cross-env NUXT_HOST=127.0.0.1 NUXT_PORT=3006 nuxt",
+    "dev": "cross-env NUXT_PORT=3006 nuxt",
     "build": "nuxt build",
+    "build-spa": "nuxt build --spa",
     "start": "cross-env NUXT_HOST=0.0.0.0 NUXT_PORT=3333 nuxt start",
+    "start-spa": "cross-env NUXT_HOST=0.0.0.0 NUXT_PORT=3338 nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
   },
