@@ -692,7 +692,7 @@ export default {
     },
     beforeCreateTrade() {
       // 强制显示精度
-      this.price = parseFloat(this.price).toFixed(this.pricedigits)
+      // this.price = parseFloat(this.price).toFixed(this.pricedigits)
       this.amount = parseFloat(this.amount).toFixed(this.amountdigits)
       this.total = parseFloat(this.total).toFixed(this.totaldigits)
       // 检查用户是否已锁
@@ -752,38 +752,7 @@ export default {
         })
       }
       this.confirmForm = false
-    },
-    // 创建订单
-    async createTrade() {
-      // 首先表单验证
-      if (!this.validateForm()) return false
-      this.isCreatingTrade = true
-      this.couldConfirmCreateTrade = false
-      const side = this.isBuy ? 'buy' : 'sell'
-      const baseId = this.baseId
-      const quoteId = this.quoteId
-      const sid = await this.cybexjs.limit_order_create(
-        baseId,
-        quoteId,
-        side,
-        this.price,
-        this.amount,
-        this.fee[0].asse,
-        this.total
-      )
-      if (sid !== null) {
-        this.$emit('create-trade-success')
-        this.$message({
-          message: 'Order Pended',
-          type: 'success'
-        })
-      }
-      this.confirmForm = false
     }
-    // 计算仓位
-    // 如果手续费和交易币种一致, 说明CYB余额不足以支付手续费
-    // 总成交金额 需要 额外扣除当前币种的手续费
-    // 具体数值由 calcFee函数从服务器获得
   }
 }
 </script>
