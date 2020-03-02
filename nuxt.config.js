@@ -75,6 +75,7 @@ export default {
    ** https://github.com/nuxt-community/vuetify-module
    */
   vuetify: {
+    treeShake: true,
     customVariables: ['~/assets/style/variables.scss'],
     theme: {
       dark: true,
@@ -105,19 +106,6 @@ export default {
    */
   build: {
     transpile: [/^vuetify/],
-    extractCSS: true,
-    optimization: {
-      splitChunks: {
-        cacheGroups: {
-          styles: {
-            name: 'style',
-            test: /\.(scss|css)$/,
-            chunks: 'all',
-            enforce: true
-          }
-        }
-      }
-    },
     cssSourceMap: false,
     /*
      ** You can extend webpack config here

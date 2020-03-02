@@ -569,8 +569,9 @@ export default {
 .v-btn.theme--cybex-dark {
   width: 100%;
 }
+
 .table-middle {
-  height: 32px;
+  /* height: 32px; */
   font-size: 12px;
   color: rgba(map-get($main, white), 0.8);
   padding: 2px 8px 0;
@@ -580,6 +581,7 @@ export default {
   tbody
   tr:not(:last-child)
   td:not(.v-data-table__mobile-row) {
+  font-size: 12px !important;
   border-bottom: 0;
 }
 

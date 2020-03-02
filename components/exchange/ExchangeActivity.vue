@@ -37,7 +37,6 @@
           <v-flex class="data d-flex mr-1">
             --
           </v-flex>
-          <span v-if="currentIsUp === false" class="ic-arrow_drop_down" />
         </div>
       </div>
       <div class="item column">
