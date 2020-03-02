@@ -549,4 +549,15 @@ export default {
   color: rgba(map-get($main, white), 0.8);
   padding: 2px 8px 0;
 }
+
+.theme--dark.v-data-table
+  tbody
+  tr:not(:last-child)
+  td:not(.v-data-table__mobile-row) {
+  border-bottom: 0;
+}
+
+.theme--dark.v-data-table thead tr:last-child th {
+  border-bottom: 0;
+}
 </style>

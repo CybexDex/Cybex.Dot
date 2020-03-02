@@ -36,11 +36,6 @@
         >
           <v-flex class="data d-flex mr-1">
             --
-            <span v-if="activityData.percent_change > 0" class="ic-arrow_up" />
-            <span
-              v-if="activityData.percent_change < 0"
-              class="ic-arrow_drop_down"
-            />
           </v-flex>
           <span v-if="currentIsUp === false" class="ic-arrow_drop_down" />
         </div>
