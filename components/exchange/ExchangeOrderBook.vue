@@ -1,13 +1,103 @@
 <template>
-  <v-container class="FlexHalf-2 pb-0 px-0" fill-height>
-    <v-row>
-      <v-col><span>1</span></v-col>
-      <v-col><span>2</span></v-col>
-    </v-row>
-    <v-row>
-      <v-col><span>2</span></v-col>
-    </v-row>
-  </v-container>
+  <div class="order-book-container pb-0 px-0 lead">
+    <!-- 标签开始 -->
+    <div class="d-flex exchange-list-head">
+      <span class="price">
+        <span>{{ $t('exchange.orderbook.Price') }}</span>
+        (
+        <asset-pairs
+          :max-width="''"
+          :color-opacity="0.4"
+          :asset-id="baseCurrency"
+        />)
+      </span>
+      <span class="amount">
+        <span>{{ $t('exchange.orderbook.Amount') }}</span>
+        (
+        <asset-pairs
+          :max-width="''"
+          :color-opacity="0.4"
+          :asset-id="quoteCurrency"
+        />)
+      </span>
+      <span class="total">
+        <span>{{ $t('exchange.orderbook.Total') }}</span>
+        (
+        <asset-pairs
+          :max-width="''"
+          :color-opacity="0.4"
+          :asset-id="baseCurrency"
+        />)
+      </span>
+    </div>
+
+    <!-- 卖 -->
+    <div
+      ref="sellRows"
+      scrollable
+      class="info-row-container sell-rows d-flex flex-column  justify-end"
+      :class="{ full: order == 'sell', close: order == 'buy' }"
+    >
+      <div
+        v-for="(row, i) of orderSellRows"
+        :key="i"
+        class="d-flex handicap sell"
+      >
+        <span class="info-row price c-sell" @click="changePrice(row)">{{
+          row.price | ceilDigits(currentGroupDecimal, null, '--')
+        }}</span>
+        <span class="info-row amount" @click="changePrice(row, i, 'sell')">{{
+          row.amount | roundDigits(digitsAmount, null, '--')
+        }}</span>
+        <span class="info-row total" @click="changePrice(row, i, 'sell')">{{
+          row.total | roundDigits(digitsTotal, null, '--')
+        }}</span>
+        <span class="groups-value sell" :style="{ width: row.perc + '%' }" />
+      </div>
+    </div>
+
+    <!-- 当前价格 -->
+    <div class="current-order d-flex">
+      <span
+        class="current-price price"
+        :class="{ up: currentIsUp === true, down: currentIsUp === false }"
+        @click="changePrice({ price: currentOrderPrice })"
+      >
+        {{ currentOrderPrice | roundDigits(digitsPrice) }}
+        <span v-if="currentIsUp === true" class="ic-arrow_up" />
+        <span v-if="currentIsUp === false" class="ic-arrow_drop_down" />
+      </span>
+      <span
+        v-if="currentOrderLegalPrice !== null"
+        class="current-amount c-highlight"
+        >{{ currentOrderLegalPrice | legalDigits(legalSymbol) }}</span
+      >
+      <span class="total" />
+    </div>
+    <!-- 买 -->
+    <div
+      ref="buyRows"
+      class="info-row-container buy-rows d-flex flex-column  justify-start"
+      :class="{ full: order === 'buy', close: order === 'sell' }"
+    >
+      <div
+        v-for="(row, i) of orderBuyRows"
+        :key="i"
+        class="d-flex handicap buy"
+      >
+        <span class="info-row price c-buy" @click="changePrice(row)">{{
+          row.price | floorDigits(currentGroupDecimal, null, '--')
+        }}</span>
+        <span class="info-row amount" @click="changePrice(row, i, 'buy')">{{
+          row.amount | roundDigits(digitsAmount, null, '--')
+        }}</span>
+        <span class="info-row total" @click="changePrice(row, i, 'buy')">{{
+          row.total | roundDigits(digitsTotal, null, '--')
+        }}</span>
+        <span class="groups-value buy" :style="{ width: row.perc + '%' }" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -527,6 +617,14 @@ export default {
   }
 }
 
+.order-book-container {
+  min-width: 260px;
+  border-radius: 4px;
+  display: grid;
+  grid-template-rows: auto 1fr 28px 1fr;
+  grid-template-columns: auto;
+}
+
 .exchange-block-container {
   padding: 0px;
   overflow: hidden;
@@ -567,6 +665,7 @@ export default {
 
 .exchange-list-head {
   line-height: 1;
+  padding: 12px 8px;
 
   > span {
     display: inline-flex;
@@ -633,7 +732,8 @@ export default {
   transition: height 0.2s, opacity 0.1s;
 
   &.sell-rows {
-    height: 200px;
+    align-self: end;
+    height: 100%;
     padding-top: 2px;
   }
 
@@ -706,7 +806,8 @@ export default {
 
 .current-order {
   height: 28px;
-  margin: 5px 0;
+  padding: 0 8px;
+  /* margin: 5px 0; */
   background-color: rgba(255, 255, 255, 0.04);
   color: $white-opacity-80;
   // opacity: 0.8;
