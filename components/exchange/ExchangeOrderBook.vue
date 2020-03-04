@@ -34,26 +34,30 @@
     <!-- 卖 -->
     <div
       ref="sellRows"
-      scrollable
-      class="info-row-container sell-rows d-flex flex-column  justify-end"
+      class="info-row-container sell-rows"
       :class="{ full: order == 'sell', close: order == 'buy' }"
     >
-      <div
-        v-for="(row, i) of orderSellRows"
-        :key="i"
-        class="d-flex handicap sell"
+      <perfect-scrollbar
+        class="d-flex flex-column-reverse "
+        :options="{ useBothWheelAxes: true }"
       >
-        <span class="info-row price c-sell" @click="changePrice(row)">{{
-          row.price | ceilDigits(currentGroupDecimal, null, '--')
-        }}</span>
-        <span class="info-row amount" @click="changePrice(row, i, 'sell')">{{
-          row.amount | roundDigits(digitsAmount, null, '--')
-        }}</span>
-        <span class="info-row total" @click="changePrice(row, i, 'sell')">{{
-          row.total | roundDigits(digitsTotal, null, '--')
-        }}</span>
-        <span class="groups-value sell" :style="{ width: row.perc + '%' }" />
-      </div>
+        <div
+          v-for="(row, i) of orderSellRows.slice().reverse()"
+          :key="i"
+          class="d-flex handicap sell"
+        >
+          <span class="info-row price c-sell" @click="changePrice(row)">{{
+            row.price | ceilDigits(currentGroupDecimal, null, '--')
+          }}</span>
+          <span class="info-row amount" @click="changePrice(row, i, 'sell')">{{
+            row.amount | roundDigits(digitsAmount, null, '--')
+          }}</span>
+          <span class="info-row total" @click="changePrice(row, i, 'sell')">{{
+            row.total | roundDigits(digitsTotal, null, '--')
+          }}</span>
+          <span class="groups-value sell" :style="{ width: row.perc + '%' }" />
+        </div>
+      </perfect-scrollbar>
     </div>
 
     <!-- 当前价格 -->
@@ -80,22 +84,24 @@
       class="info-row-container buy-rows d-flex flex-column  justify-start"
       :class="{ full: order === 'buy', close: order === 'sell' }"
     >
-      <div
-        v-for="(row, i) of orderBuyRows"
-        :key="i"
-        class="d-flex handicap buy"
-      >
-        <span class="info-row price c-buy" @click="changePrice(row)">{{
-          row.price | floorDigits(currentGroupDecimal, null, '--')
-        }}</span>
-        <span class="info-row amount" @click="changePrice(row, i, 'buy')">{{
-          row.amount | roundDigits(digitsAmount, null, '--')
-        }}</span>
-        <span class="info-row total" @click="changePrice(row, i, 'buy')">{{
-          row.total | roundDigits(digitsTotal, null, '--')
-        }}</span>
-        <span class="groups-value buy" :style="{ width: row.perc + '%' }" />
-      </div>
+      <perfect-scrollbar :options="{ useBothWheelAxes: true }">
+        <div
+          v-for="(row, i) of orderBuyRows"
+          :key="i"
+          class="d-flex handicap buy"
+        >
+          <span class="info-row price c-buy" @click="changePrice(row)">{{
+            row.price | floorDigits(currentGroupDecimal, null, '--')
+          }}</span>
+          <span class="info-row amount" @click="changePrice(row, i, 'buy')">{{
+            row.amount | roundDigits(digitsAmount, null, '--')
+          }}</span>
+          <span class="info-row total" @click="changePrice(row, i, 'buy')">{{
+            row.total | roundDigits(digitsTotal, null, '--')
+          }}</span>
+          <span class="groups-value buy" :style="{ width: row.perc + '%' }" />
+        </div>
+      </perfect-scrollbar>
     </div>
   </div>
 </template>
