@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-flex d-flex class="exchange-activity" justify-space-between>
+    <v-flex d-flex class="exchange-activity" justify-space-around>
       <!-- 正常交易市场显示选择下拉 -->
       <!-- 交易大赛显示固定交易选择 -->
       <!-- <MarketPanel v-if="!mode" /> -->
@@ -163,7 +163,7 @@ export default {
   height: $activity-height;
   align-items: center;
   box-shadow: inset 0 -1px 0 0 #111621;
-
+  padding-left: 200px;
   a {
     text-decoration: none;
     color: white;

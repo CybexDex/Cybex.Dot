@@ -1,5 +1,7 @@
 <template>
-  <v-flex class="exchange-block-container has-scroll FlexHalf-2">
+  <v-flex
+    class="exchange-block-container market-trades-container has-scroll FlexHalf-2"
+  >
     <div class="exchange-block-title">
       <span>{{ $t('exchange.block-title.market-trades') }}</span>
     </div>
@@ -193,6 +195,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '~assets/style/_fonts/_font_mixin';
+
+.market-trades-container {
+  margin-left: 14px;
+}
 
 .exchange-block-title {
   margin-bottom: 6px;

@@ -1,5 +1,5 @@
 <template>
-  <div class="order-book-container pb-0 px-0 lead">
+  <div class="order-book-container pb-0 mb-1 px-0 lead">
     <!-- 标签开始 -->
     <div class="d-flex exchange-list-head">
       <span class="price">
