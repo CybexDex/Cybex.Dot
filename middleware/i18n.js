@@ -46,6 +46,6 @@ export default function({ isHMR, app, store, params, error, route, redirect }) {
 
   // when no logined
   if (route.path === '/') {
-    return redirect(`/${localeData.name}/exchange`)
+    return redirect(`/${localeData.name}/`)
   }
 }

@@ -92,3 +92,51 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+@import '~assets/style/_fonts/_font_mixin';
+@import '~assets/style/_vars/_colors';
+
+.theme--dark.v-footer.footer-wrap {
+  &,
+  .nav-footer {
+    box-shadow: none;
+    background: map-get($main, lead);
+    overflow-x: hidden;
+  }
+
+  .v-toolbar__content {
+    background: map-get($main, lead);
+    width: 100%;
+    min-width: 1280px;
+    word-break: keep-all;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  a:hover {
+    &,
+    .v-icon::before {
+      color: map-get($main, lilac) !important;
+    }
+  }
+
+  .left-footer {
+    a {
+      font-size: 12px;
+      line-height: 2;
+      color: rgba(map-get($main, lead), 0.8);
+      @include f-cybex-style('black');
+    }
+  }
+
+  .right-footer {
+    .v-icon {
+      opacity: 0.8;
+      color: map-get($main, grey);
+      font-size: 24px;
+    }
+  }
+}
+</style>

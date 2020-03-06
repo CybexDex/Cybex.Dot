@@ -2,7 +2,7 @@
 // 用户身份验证 解锁等相关逻辑
 export const state = () => ({
   info: null, // 用户全信息
-  username: 'Dave', // 当前用户,
+  username: null, // 当前用户,
   islocked: null
 })
 

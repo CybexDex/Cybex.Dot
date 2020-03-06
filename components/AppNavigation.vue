@@ -1,29 +1,25 @@
 <template>
-  <v-toolbar
-    class="cybex-nav pa-0"
-    :class="{ 'small-size': height < 60 }"
-    :height="height"
-    fixed
-  >
-    <v-snackbar
-      v-model="isShowMsg"
-      :class="`msg-${msgType || 'normal'}`"
-      :timeout="msgDelay"
-      bottom
-      absolute
-    >
-      <div class="content">
-        <span
-          class="icon"
-          :class="{
-            'ic-correct': msgType != 'error',
-            'ic-cancel': msgType == 'error'
-          }"
-        />
-        <span class="msg">{{ message }}</span>
-      </div>
-    </v-snackbar>
-    <perfect-scrollbar>
+  <div>
+    <v-app-bar class="cybex-nav">
+      <v-snackbar
+        v-model="isShowMsg"
+        :class="`msg-${msgType || 'normal'}`"
+        :timeout="msgDelay"
+        bottom
+        absolute
+      >
+        <div class="content">
+          <span
+            class="icon"
+            :class="{
+              'ic-correct': msgType != 'error',
+              'ic-cancel': msgType == 'error'
+            }"
+          />
+          <span class="msg">{{ message }}</span>
+        </div>
+      </v-snackbar>
+
       <div class="logo-banner">
         <router-link :to="$i18n.path('/')">
           <img
@@ -33,32 +29,60 @@
           />
         </router-link>
       </div>
+
+      <div
+        class="exchange-tab"
+        :class="{ 'fill-height': $route.path.indexOf('/exchange') > -1 }"
+      >
+        <nuxt-link
+          :to="$i18n.path(defaultExchangePath)"
+          :class="getLinkClass('/exchange')"
+          >{{ $t('nav.exchange') }}</nuxt-link
+        >
+      </div>
+      <v-spacer></v-spacer>
+
+      <v-menu
+        v-if="username"
+        content-class="nav-menu"
+        class="pl-0 ml-5 nav-menu-wrapper column"
+        :transition="'fade-transition'"
+        offset-y
+        auto
+        open-on-hover
+      >
+        <div
+          slot="activator"
+          class="full-width"
+          :class="getLinkClass('/fund')"
+          dark
+        >
+          {{ $t('nav.funds') }}
+        </div>
+        <v-list class="asset-menu">
+          <v-list-tile
+            v-for="(item, index) in funditems"
+            :key="index"
+            :class="getLinkClass(item.path)"
+            @click="$i18n.jumpTo(item.path)"
+          >
+            <v-list-tile-title>{{ $t(item.title) }}</v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
+      <nuxt-link v-else :class="getLinkClass('/')" :to="toLoginPath">{{
+        $t('nav.login')
+      }}</nuxt-link>
       <div class="divider" />
 
-      <v-tabs v-model="currentTab" slider-color="cybex" lead>
-        <v-tab :ripple="false">
-          <nuxt-link :to="$i18n.path(defaultExchangePath)">{{
-            $t('nav.exchange')
-          }}</nuxt-link>
-        </v-tab>
-        <!-- <v-tab :ripple="false">{{
-          $t('exchange.order-table.tab-title.history-order')
-        }}</v-tab>
-        <v-tab :ripple="false">{{
-          $t('exchange.order-table.tab-title.history-trade')
-        }}</v-tab> -->
-      </v-tabs>
-
-      <v-spacer />
-      <div class="divider" />
-
-      <v-menu offset-y transition="'fade-transition'" attchach="#app">
+      <v-menu offset-y transition="'fade-transition'">
         <template v-slot:activator="{ on }">
           <v-btn
+            active-class="v-menu__activator--active"
             class="info--text"
-            color="lead"
+            color="cybexGrey"
             dark
-            depressed
+            text
             :ripple="false"
             v-on="on"
           >
@@ -77,8 +101,8 @@
           </v-list-item>
         </v-list>
       </v-menu>
-    </perfect-scrollbar>
-  </v-toolbar>
+    </v-app-bar>
+  </div>
 </template>
 
 <script>
@@ -132,6 +156,14 @@ export default {
       set(value) {
         this.$store.commit('CLOSE_MSG')
       }
+    },
+    toLoginPath() {
+      const isLoginPage =
+        this.$route.matched.length === 1 &&
+        this.$route.matched[0].path === '/:lang'
+      return !isLoginPage
+        ? this.$i18n.path('/' + '?from=' + this.$route.path)
+        : this.$i18n.path('/')
     }
   },
   watch: {},
@@ -224,41 +256,43 @@ export default {
       @include f-cybex-style('black');
       color: map-get($main, grey);
       margin: 0 16px;
-      height: 80%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: space-around;
+      position: relative;
 
       &.active-link {
         color: map-get($main, orange);
 
         &.exchange-link {
-          height: calc(100% - 18px);
+          height: 21px;
           display: block;
-          transform: translateY(calc(50% + 2px));
-          position: relative;
+          position: static;
 
           &:after {
             content: '';
             display: block;
-            width: 100%;
+            width: calc(100% - 32px);
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
             background-image: map-get($gradients, goldex);
             height: 4px;
             border: none;
-            top: calc(50% - 2px);
-            position: relative;
+            position: absolute;
+            bottom: 0;
           }
         }
       }
     }
 
     .exchange-tab {
+      position: relative;
       display: flex;
       align-items: center;
       padding: 0;
       flex-direction: column;
+      justify-content: center;
       flex: 0 0 0;
     }
 

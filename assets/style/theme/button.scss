@@ -138,7 +138,14 @@ $btn-icon-normal: (
 }
 
 // mixin end
+.v-btn:before {
+  background-color: transparent;
+}
+
 .v-btn {
+  &.v-size--default {
+    font-size: 1rem;
+  }
   &.theme--cybex-dark {
     @include f-cybex-style(heavy);
     text-transform: capitalize;
@@ -156,6 +163,7 @@ $btn-icon-normal: (
     &.v-btn:hover:before,
     &.v-btn:focus:before {
       background-color: transparent;
+      color: orange;
     }
     // disabled
     &.v-btn--disabled {

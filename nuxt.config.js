@@ -80,6 +80,7 @@ export default {
       dark: true,
       themes: {
         dark: {
+          anchor: '#212939',
           orange: '#FF9143',
           blue: '#2e5be2',
           cybexCrimson: '#D2323E',
@@ -89,7 +90,7 @@ export default {
           dark: '#171D2A',
           cybexRed: '#D7333D',
           lead: '#1b2230',
-          primary: '#ff9143',
+          primary: '#78819A',
           accent: colors.green.accent3,
           secondary: colors.green.accent3,
           info: '#78819a',
