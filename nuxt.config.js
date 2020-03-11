@@ -45,6 +45,10 @@ export default {
       src: '~plugins/tradingview',
       mode: 'client'
     },
+    {
+      src: '~plugins/wallet',
+      mode: 'client'
+    },
     '~plugins/global-components'
   ],
   /*
@@ -63,7 +67,8 @@ export default {
     '@nuxtjs/axios',
     // '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
-    '@nuxtjs/dotenv'
+    '@nuxtjs/dotenv',
+    'cookie-universal-nuxt'
   ],
   /*
    ** Axios module configuration
@@ -90,7 +95,7 @@ export default {
           dark: '#171D2A',
           cybexRed: '#D7333D',
           lead: '#1b2230',
-          primary: '#78819A',
+          primary: '#FF9143',
           accent: colors.green.accent3,
           secondary: colors.green.accent3,
           info: '#78819a',

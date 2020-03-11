@@ -14,7 +14,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({})
+    ...mapGetters({}),
+    cookieName() {
+      return this.$cookies.get('auth-username')
+    }
   },
   methods: {
     /* 科学计数法强制转换

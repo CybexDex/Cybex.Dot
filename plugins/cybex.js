@@ -129,9 +129,6 @@ export default ({ store, app, route }) => {
     })
   }
 
-  // 初始化用户信息
-  // 本地钱包
-
   Vue.prototype.$message = ({ type, message, delay }) => {
     store.commit('SHOW_MSG', { type, message, delay })
   }

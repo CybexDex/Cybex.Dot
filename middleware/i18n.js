@@ -3,6 +3,7 @@ import { find } from 'lodash'
 export default function({ isHMR, app, store, params, error, route, redirect }) {
   // If middleware is called from hot module replacement, ignore it
   if (isHMR) return
+  console.log('--', store.getters['auth/username'])
 
   const storeLocale = store.getters['i18n/locale']
   const locale = params.lang || app.i18n.fallbackLocale
@@ -27,7 +28,9 @@ export default function({ isHMR, app, store, params, error, route, redirect }) {
     app.i18n.locale = localeData.code || localeData.name
   }
 
-  const isLogin = store.getters['auth/username']
+  const cookieRes = app.$cookies.get('auth-username')
+
+  const isLogin = !!cookieRes
 
   // 已登录时 不可访问注册 登录 恢复本地钱包
   // 并默认跳转到交易所页面

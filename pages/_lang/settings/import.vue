@@ -5,7 +5,7 @@
     <v-form
       ref="form"
       v-model="isValid"
-      on-submit="return false"
+      @submit.prevent
       @submit="importPrivateKeyIntoWallet"
     >
       <v-text-field

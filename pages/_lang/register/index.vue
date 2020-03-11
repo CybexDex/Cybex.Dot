@@ -25,7 +25,6 @@
                   :placeholder="$t('placeholder.enter_account')"
                   :label="$t('form_label.account_name')"
                   :rules="nameRules"
-                  @input="onAccountNameChanged"
                 />
               </v-flex>
               <!-- password & repeat password -->
@@ -37,7 +36,7 @@
                   background-color="#212939"
                   large
                   :type="showPassword ? 'text' : 'password'"
-                  :class="`pwd-input ${useGenerated ? 'generated-field' : ''}`"
+                  :class="`pwd-input`"
                   prepend-inner-icon="ic-lock_outline"
                   :label="$t('form_label.password')"
                   :placeholder="$t('placeholder.enter_password')"
@@ -74,29 +73,32 @@
               </v-flex>
               <!-- notify -->
               <v-flex xs12>
-                <v-flex xs12 class="notify-check">
-                  <cybex-checkbox
+                <v-flex class="notify-check">
+                  <v-checkbox
                     v-model="warnForgot"
-                    middle
+                    color="orange"
+                    :ripple="false"
                     :label="$t('checkbox_label.warn_no_forgot')"
-                  />
+                  >
+                  </v-checkbox>
                 </v-flex>
-                <v-flex xs12 class="notify-check">
-                  <cybex-checkbox
+                <v-flex class="notify-check">
+                  <v-checkbox
                     v-model="warnNoRestore"
-                    middle
+                    color="orange"
+                    :ripple="false"
                     :label="$t('checkbox_label.warn_no_restore')"
                   />
                 </v-flex>
-                <v-flex xs12 class="notify-check mb-4">
-                  <cybex-checkbox
+                <v-flex class="notify-check mb-4">
+                  <v-checkbox
                     v-model="warnBackup"
-                    middle
+                    color="orange"
+                    :ripple="false"
                     :label="$t('checkbox_label.warn_backup')"
                   />
                 </v-flex>
               </v-flex>
-
               <v-flex xs12 class="pin-code">
                 <cybex-btn
                   block
@@ -149,14 +151,18 @@
 @import '~assets/style/_fonts/_font_mixin';
 @import '~assets/style/_vars/_colors';
 
-.theme--dark.v-label {
-  @include f-cybex-style(medium);
-  color: rgba(map-get($main, grey), 0.5);
-  font-size: 14px !important;
-}
 .register {
   font-size: 14px;
   padding-top: 48px;
+
+  .theme--dark.v-label {
+    @include f-cybex-style(medium);
+    color: rgba(map-get($main, white), 0.8);
+    font-size: 14px !important;
+  }
+  .v-input--selection-controls .v-input__slot > .theme--dark.v-label {
+    font-size: 14px !important;
+  }
 
   .register-form-wrapper {
     width: 800px;
@@ -194,6 +200,11 @@
     }
   }
 
+  .notify-check {
+    .v-label.theme--dark {
+      color: rgba(map-get($main, white), 0.8) !important;
+    }
+  }
   .notify-check:not(:last-child) {
     margin-bottom: 12px;
   }
@@ -253,42 +264,31 @@
 </style>
 
 <script>
-import clipboard from 'clipboard-polyfill'
-
-import { debounce } from 'lodash'
 import utils from '~/components/mixins/utils'
 import userValid from '~/components/mixins/user-valid.js'
-import { LOGIN_MODE_LOCAL, LOGIN_MODE_CLOUD } from '~/lib/user'
+import { LOGIN_MODE_LOCAL } from '~/lib/user'
 
 export default {
   components: {},
   mixins: [utils, userValid],
   data() {
     return {
-      registerMode: LOGIN_MODE_CLOUD,
+      registerMode: LOGIN_MODE_LOCAL,
       message: '',
-      verifyCode: {},
-      isAccountChecked: false,
-      isAccountValid: false,
-      isAccountNew: false,
-      showCopied: false,
+      isAccountValid: true,
       showPassword: false,
-      useGenerated: false,
       warnForgot: false,
       warnNoRestore: false,
       warnBackup: false,
       pwdStrength: 1,
-      generated: '',
       name: '',
       password: '',
       repeatpwd: '',
-      captcha: '',
       nameRules: [
         (value) =>
           !this.isAccountValid ||
           !!value ||
-          this.$t('validation.account_required'),
-        (value) => this.checkName(value)
+          this.$t('validation.account_required')
       ],
       passwordRules: [
         (value) => this.checkPassword(value) || this.$t('validation.pwd_length')
@@ -300,12 +300,7 @@ export default {
             ? value === this.password || this.$t('validation.pwd_unmatched')
             : this.$t('validation.pwd_repeat'))
       ],
-      validcodeRules: [
-        (value) =>
-          !this.isAccountValid ||
-          !!value ||
-          this.$t('validation.validcode_required')
-      ],
+
       inRegister: false
     }
   },
@@ -313,67 +308,28 @@ export default {
     modeStr() {
       return this.$t('wallet.Local')
     },
-
     canCreate() {
       return (
-        this.checkName(this.name, true) &&
         this.checkPassword(this.password, true) &&
         this.name &&
-        this.isAccountChecked &&
         this.isAccountValid &&
         this.password &&
         this.password === this.repeatpwd &&
-        this.captcha &&
         this.repeatpwd &&
         this.warnForgot &&
         this.warnNoRestore &&
-        this.warnBackup &&
-        this.verifyCode
+        this.warnBackup
       )
       // return this.warnForgot && this.warnNoRestore && this.warnBackup
     }
   },
-  async mounted() {
-    try {
-      await this.refreshCaptch()
-      this.generated = await this.$call(this.cybexjs.genPassword)
-    } catch (e) {}
-  },
-  beforeDestroy() {
-    if (this.autoRefresh) {
-      clearTimeout(this.autoRefresh)
-      this.autoRefresh = null
-    }
-  },
+  async mounted() {},
+  beforeDestroy() {},
   methods: {
     onPasswordChanged(val) {
       this.$refs.form.validate()
     },
-    toggleRegisterMode() {
-      this.registerMode =
-        this.registerMode === LOGIN_MODE_LOCAL
-          ? LOGIN_MODE_CLOUD
-          : LOGIN_MODE_LOCAL
-      // 密码规则不同 重新验证
-      this.$refs.form.validate()
-    },
-    onAccountNameChanged: debounce(async function() {
-      if (!this.name) return
-      this.isAccountChecked = false
-      this.name = (this.name || '').slice(0, 64)
-      try {
-        this.isAccountNew = !(await this.$call(
-          this.cybexjs.get_user,
-          this.name
-        ))
-        this.isAccountChecked = true
-        this.$refs.form.validate()
-      } catch (e) {
-        this.isAccountNew = true
-        this.isAccountChecked = true
-        this.$refs.form.validate()
-      }
-    }, 200),
+
     checkPassword(value, returnBool) {
       if (!this.isAccountValid) {
         return true
@@ -394,165 +350,15 @@ export default {
       }
       return true
     },
-    async createAccount() {
-      const failDeal = () => {
-        try {
-          ;(window._czc || []).push([
-            '_trackEvent',
-            'unique',
-            'REGISTER_FAILED',
-            this.name
-          ])
-        } catch (e) {
-          console.log(e)
-        }
-        this.captcha = ''
-        this.refreshCaptch(true)
-      }
+    createAccount() {
       if (this.$refs.form.validate()) {
         this.inRegister = true
-        await this.$eventHandle(() => {
-          this.$store
-            .dispatch('auth/register', {
-              mode: this.registerMode,
-              username: this.name,
-              password: this.password,
-              codeId: this.verifyCode.id,
-              code: this.captcha
-            })
-            .then((res) => {
-              if (res) {
-                try {
-                  ;(window._czc || []).push([
-                    '_trackEvent',
-                    'unique',
-                    'REGISTER_DONE:BIN',
-                    this.name
-                  ])
-                } catch (e) {
-                  console.log(e)
-                }
-                this.$router.push(
-                  this.$i18n.path('/settings/backup?register=true')
-                )
-              } else {
-                failDeal()
-              }
-            })
-            .catch((e) => {
-              console.error(e)
-              failDeal()
-            })
-            .finally(() => {
-              this.inRegister = false
-            })
+        this.$store.dispatch('auth/register', {
+          username: this.name,
+          password: this.password
         })
-        // try {
-        //   this.inRegister = true;
-        //   isReg = await this.$callmsg(
-        //     g.register,
-        //     this.name,
-        //     this.password,
-        //     this.verifyCode.id,
-        //     this.captcha
-        //   );
-        // } catch (error) {}
-        // this.inRegister = false;
-        // if (isReg) {
-        //   ga("send", {
-        //     hitType: "event",
-        //     eventCategory: "unique",
-        //     eventAction: "REGISTER_DONE:CLOUD",
-        //     eventLabel: this.name
-        //   });
-        //   try {
-        //     const logined = await this.$callmsg(
-        //       g.unlock,
-        //       this.name,
-        //       this.password,
-        //       config.unlockPeriod
-        //     );
-        //     this.$nextTick(() => {
-        //       if (logined) {
-        //         ga("send", {
-        //           hitType: "event",
-        //           eventCategory: "unique",
-        //           eventAction: "LOGIN_DONE:CLOUD",
-        //           eventLabel: this.name
-        //         });
-        //         this.$i18n.jumpTo("/register/guide");
-        //       } else {
-        //         this.$i18n.jumpTo("/");
-        //       }
-        //     });
-        //   } catch (e) {}
-        // } else {
-        //   ga("send", {
-        //     hitType: "event",
-        //     eventCategory: "unique",
-        //     eventAction: "REGISTER_FAILED",
-        //     eventLabel: this.name
-        //   });
-        //   this.captcha = "";
-        //   this.refreshCaptch(true);
-        // }
+        this.$router.push(this.$i18n.path('/settings/backup'))
       }
-    },
-    checkName(value, returnBool) {
-      let msg = ''
-      if (/([^a-z0-9-])/g.test(value)) {
-        msg = this.$t('validation.account_no_sign')
-      }
-      if (!/^([a-z])/g.test(value)) {
-        msg = this.$t('validation.account_alpha')
-      }
-      if (
-        !value ||
-        (value && value.length < 3) ||
-        (value && value.length > 64)
-      ) {
-        if (value && value.length > 64) {
-          msg = this.$t('validation.account_too_long')
-        } else {
-          msg = this.$t('validation.account_too_short')
-        }
-      }
-      if (!/[0-9-]+.*$/g.test(value)) {
-        msg = this.$t('validation.account_slash')
-      }
-      if (!/^((?!--).)*$/g.test(value)) {
-        msg = this.$t('validation.account_slash_limit')
-      }
-      if (!/([a-z0-9])$/g.test(value)) {
-        msg = this.$t('validation.account_number')
-      }
-      if (this.isAccountChecked && !this.isAccountNew) {
-        msg = this.$t('validation.account_exists')
-      }
-      if (msg) {
-        this.isAccountValid = false
-        return returnBool ? false : msg
-      } else {
-        this.isAccountValid = this.isAccountNew
-      }
-      return true
-    },
-    onCopy() {
-      clipboard.writeText(this.generated)
-      this.$message({
-        message: this.$t('message.copied')
-      })
-    },
-    async refreshCaptch(isReg) {
-      if (this.autoRefresh) {
-        clearTimeout(this.autoRefresh)
-        this.autoRefresh = null
-      }
-      this.autoRefresh = setTimeout(() => {
-        this.refreshCaptch()
-      }, 1.5 * 60 * 1000)
-      const s = await this.$callmsg(this.cybexjs.verify_code)
-      this.verifyCode = s
     }
   },
 

@@ -12,6 +12,8 @@ export const state = () => ({
 
 export const getters = {
   showMsg: (state) => state.showMsg,
+  showUnlock: (state) => state.showUnlock,
+  showLogout: (state) => state.showLogout,
   msgContent: (state) => state.msgContent,
   msgType: (state) => state.msgType,
   msgDelay: (state) => state.msgDelay

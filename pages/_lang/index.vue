@@ -11,14 +11,15 @@
       </div>
       <v-form
         ref="form"
-        on-submit="return false;"
         class="cybex large"
         lazy-validation
         @submit="login"
+        @submit.prevent
       >
-        <!-- 本地钱包 bin文件 -->
-        <cybex-file-upload :file-accept="'.bin'" @file-changed="fileChanged" />
+        <!-- 本地钱包 json文件 -->
+        <cybex-file-upload :file-accept="'.json'" @file-changed="fileChanged" />
         <v-text-field
+          v-model="password"
           filled
           dark
           background-color="#212939"
@@ -52,9 +53,13 @@
 </template>
 
 <script>
+import { isHex, isObject, u8aToString } from '@polkadot/util'
+import keyring from '@polkadot/ui-keyring'
 import utils from '~/components/mixins/utils'
+
 export default {
   mixins: [utils],
+
   data() {
     return {
       hasSubmitted: false,
@@ -84,7 +89,7 @@ export default {
     },
 
     couldLogin() {
-      const checkCondition = this.name && this.password
+      const checkCondition = this.file && this.password
 
       return checkCondition && !this.inLogin
     }
@@ -107,56 +112,77 @@ export default {
       return !!this.password
     },
     fileChanged(file) {
-      this.readBinFile(file)
+      this.readJsonFile(file)
     },
-    readBinFile(file) {
+    readJsonFile(file) {
       if (!file) {
         this.file = null
-        return false
-      }
-      const reader = new FileReader()
-      reader.onload = (evt) => {
-        this.file = Buffer.from(evt.target.result, 'binary')
-      }
-      reader.readAsBinaryString(file)
-    },
-    async login(event) {
-      if (!this.couldLogin) {
         return
+      }
+
+      const reader = new FileReader()
+      const NOOP = () => undefined
+
+      reader.onabort = NOOP
+      reader.onerror = NOOP
+      reader.onload = ({ target }) => {
+        if (target && target.result) {
+          try {
+            const json = JSON.parse(u8aToString(new Uint8Array(target.result)))
+            const publicKey = keyring.decodeAddress(json.address, true)
+            keyring.encodeAddress(publicKey)
+            const isFileValid =
+              publicKey.length === 32 &&
+              isHex(json.encoded) &&
+              isObject(json.meta) &&
+              (Array.isArray(json.encoding.content)
+                ? json.encoding.content[0] === 'pkcs8'
+                : json.encoding.content === 'pkcs8')
+            if (isFileValid) {
+              this.file = json
+            }
+          } catch {}
+        }
+      }
+      reader.readAsArrayBuffer(file)
+    },
+    authLoginSuccessDeal() {
+      this.$message({
+        message: this.$t('message.login_succ')
+      })
+
+      // url跳转
+      const fromUrl = this.$route.query.from
+      // 云钱包跳转到登录前页面或者交易所
+      const url = fromUrl ?? this.$i18n.path('/exchange')
+
+      console.log('redirect to ', url)
+      this.$router.push(url)
+    },
+    login(event) {
+      if (!this.couldLogin) {
+        return false
       }
       this.inLogin = true
       this.hasSubmitted = true
       // try {
-      const mode = this.LOGIN_MODE_LOCAL
       // console.log(" this.file ", this.file);
-      await this.authLogin({
-        username: this.name,
-        password: this.password,
-        mode,
-        walletFile: this.file
-      })
-        //  登录成功
-        .then(async (res) => {
-          if (res) {
-            this.someErr = false
-            await this.authLoginSuccessDeal()
-          } else {
-            Error('login failed')
-          }
+      try {
+        const result = this.$store.dispatch('auth/login', {
+          json: this.file,
+          password: this.password
         })
-        // 登录失败
-        .catch((e) => {
-          this.someErr = true
-          this.errCheckTimes = 0
-          this.$refs.form.validate()
-          console.error(e)
-        })
-        // 清除正在登录状态
-        .finally(() => {
-          this.inLogin = false
-        })
-
-      return false
+        if (result) {
+          this.someErr = false
+          this.authLoginSuccessDeal()
+        }
+      } catch {
+        this.someErr = true
+        this.errCheckTimes = 0
+        this.$refs.form.validate()
+      } finally {
+        this.inLogin = false
+      }
     }
   },
   head() {
@@ -190,6 +216,11 @@ export default {
   input {
     color: white;
   }
+  .theme--dark.v-label {
+    @include f-cybex-style(medium);
+    color: rgba(map-get($main, grey), 0.5);
+    font-size: 14px !important;
+  }
 }
 
 .v-textarea .v-input__control {
@@ -214,11 +245,6 @@ export default {
   margin-top: 8px;
 }
 
-.theme--dark.v-label {
-  @include f-cybex-style(medium);
-  color: rgba(map-get($main, grey), 0.5);
-  font-size: 14px !important;
-}
 .toggle-login {
   cursor: pointer;
   position: absolute;

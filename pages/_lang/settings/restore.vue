@@ -10,7 +10,7 @@
     <v-form
       ref="form"
       v-model="formIsValid"
-      on-submit="return false"
+      @submit.prevent
       @submit="createNewWallet"
     >
       <div class="select-label">{{ $t('wallet.phrase') }}</div>
@@ -32,6 +32,20 @@
         "
         :error-messages="invalidRestoreObjMessages"
         @blur="validateRestoreObj"
+      />
+      <v-text-field
+        v-model="name"
+        class="restore-ctrl"
+        filled
+        dark
+        background-color="#212939"
+        large
+        prepend-inner-icon="ic-avatar"
+        required
+        clearable
+        :placeholder="$t('placeholder.enter_account')"
+        :label="$t('form_label.account_name')"
+        :rules="nameRules"
       />
       <v-text-field
         v-model="password"
@@ -71,6 +85,7 @@
 </template>
 
 <script>
+import { mnemonicValidate } from '@polkadot/util-crypto'
 import userValid from '~/components/mixins/user-valid.js'
 
 const RESTORE_METHOD_PHRASE = 0
@@ -84,6 +99,9 @@ export default {
       // form字段
       formIsValid: false,
       password: '',
+      name: '',
+      isAccountValid: true,
+
       confirmPassword: '',
       restoreObj: '',
       showPassword: false,
@@ -92,6 +110,12 @@ export default {
       restoreMethodItems: [
         { value: RESTORE_METHOD_PHRASE, text: this.$t('wallet.phrase') },
         { value: RESTORE_METHOD_KEY, text: this.$t('wallet.key') }
+      ],
+      nameRules: [
+        (value) =>
+          !this.isAccountValid ||
+          !!value ||
+          this.$t('validation.account_required')
       ],
       // 验证规则
       passwordRules: [
@@ -149,15 +173,8 @@ export default {
   methods: {
     validateRestoreObj(ev) {
       const val = ev.target.value
-      let checkValid = false
-      // 助记词至少50位
-      if (this.restoreByPhrase) {
-        checkValid = val.length > 50
-      } else {
-        // 私钥5开头 51位
-        checkValid = new RegExp(/^5/g).test(val) && val.length === 51
-      }
-      console.log('checkValid', checkValid)
+      const checkValid = mnemonicValidate(val)
+
       if (!val) {
         this.formIsValid = false
         this.invalidRestoreObjMessages = [
@@ -176,29 +193,29 @@ export default {
       if (!this.formIsValid) {
         return
       }
-      this.$store
-        .dispatch('auth/resetWallet', {
-          mode: this.restoreByPhrase ? 'phrase' : 'key',
-          input: this.restoreObj,
-          password: this.password
+      try {
+        const result = this.$store.dispatch('auth/register', {
+          username: this.name,
+          password: this.password,
+          mnemonic: this.restoreObj
         })
-        .then((res) => {
+        if (result) {
           console.log(
             'redirect to ',
             this.$i18n.path('/settings/success/restore')
           )
           this.$router.push(this.$i18n.path('/settings/success/restore'))
-        })
-        .catch((e) => {
-          this.formIsValid = false
-          const errmsg = e.msg
-            ? e.msg
-                .split('.')
-                .slice(1)
-                .join('_')
-            : e.message
-          this.invalidRestoreObjMessages = [this.$t('error.' + errmsg)]
-        })
+        }
+      } catch (e) {
+        this.formIsValid = false
+        const errmsg = e.msg
+          ? e.msg
+              .split('.')
+              .slice(1)
+              .join('_')
+          : e.message
+        this.invalidRestoreObjMessages = [this.$t('error.' + errmsg)]
+      }
     }
   },
   head() {

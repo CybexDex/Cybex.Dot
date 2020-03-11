@@ -18,41 +18,6 @@
           <div class="content">{{ $t('info.backup_wallet.importance') }}</div>
         </v-flex>
         <v-flex class="account-list">
-          <div class="sub-title">{{ $t('sub_title.wallet_user_list') }}</div>
-          <perfect-scrollbar
-            class="ps-shown"
-            :options="{ wheelPropagation: true }"
-          >
-            <v-flex class="account-list-content" column>
-              <v-flex
-                v-for="(account, idx) in accountList"
-                :key="idx"
-                class="account-list-item"
-                d-flex
-              >
-                <v-flex d-flex class="account-name">
-                  <span class="counter">{{ idx + 1 }}.</span>
-                  <span>
-                    <v-icon>{{
-                      account.accessIsFull ? 'ic-avatar full' : 'ic-avatar'
-                    }}</v-icon>
-                    <span class="ac-username">{{ account.name }}</span>
-                  </span>
-                </v-flex>
-                <v-flex
-                  d-flex
-                  class="account-access"
-                  :class="{ full: account.accessIsFull }"
-                  justify-end
-                  >{{
-                    account.accessIsFull
-                      ? $t('wallet.full_access')
-                      : $t('wallet.partial_access')
-                  }}</v-flex
-                >
-              </v-flex>
-            </v-flex>
-          </perfect-scrollbar>
           <v-flex d-flex class="download-ctrl" @click="download">
             <div>
               <div class="l1">{{ $t('wallet.download') }}</div>
@@ -64,7 +29,7 @@
             <v-icon>ic-deposit</v-icon>
           </v-flex>
           <span
-            v-if="$route.query.register && clickedDownload"
+            v-if="clickedDownload"
             class="to-exchange"
             @click="checkHasBackup"
           >
@@ -84,45 +49,15 @@
           </v-flex>
           <div class="content">{{ $t('info.phrase.importance') }}</div>
         </v-flex>
-        <v-flex v-if="!couldCheckphrase" class="pwd">
-          <v-form
-            v-model="valid"
-            on-submit="return false;"
-            @submit="togglePhrase(true)"
-          >
-            <v-text-field
-              v-model="password"
-              filled
-              dark
-              background-color="#212939"
-              class="pwd-input"
-              large
-              :type="passwordIsVisible ? 'text' : 'password'"
-              prepend-inner-icon="ic-lock_outline"
-              :label="$t('form_label.password')"
-              :placeholder="$t('placeholder.enter_password')"
-              :append-icon="
-                passwordIsVisible ? 'ic-visibility_off' : 'ic-visibility_on'
-              "
-              :rules="passwordRules"
-              :error-messages="passwordError"
-              clearable
-              required
-              @click:append="passwordIsVisible = !passwordIsVisible"
-            />
-            <cybex-btn type="submit" :disabled="!valid" middle major>{{
-              $t('button.show_phrase')
-            }}</cybex-btn>
-          </v-form>
-        </v-flex>
+
         <!-- 显示助记词 -->
-        <v-flex v-else class="phrase">
+        <v-flex class="phrase">
           <div class="sub-title mb-2">{{ $t('info.phrase.hint_title') }}</div>
           <div class="key-content">
             <img src="~/assets/svg/ic-brainkey.svg" />
-            <span @click="copyPhrase">{{ phrase }}</span>
+            <span @click="copyPhrase">{{ seed || '' }}</span>
           </div>
-          <cybex-btn major middle @click="togglePhrase(false)">{{
+          <cybex-btn major middle @click="toggleBackup()">{{
             $t('info.phrase.btn_confirm')
           }}</cybex-btn>
         </v-flex>
@@ -135,48 +70,36 @@
 import moment from 'moment'
 import { mapGetters } from 'vuex'
 import clipboard from 'clipboard-polyfill'
+import { saveAs } from 'file-saver'
 
 export default {
   data() {
     return {
       blob: null,
       valid: false, // 是否可以查看助记词
-      currentTab: 0,
       clickedDownload: false,
-      password: '',
+
       passwordIsVisible: false,
       couldCheckphrase: false,
       passwordError: '',
-      passwordRules: [(value) => !!value || this.$t('validation.pwd_required')],
-      phrase:
-        'pyruvic gosling zygite buzzies stipula smith baline loyalty glaury edea trinal jacinth tatty cauch achtel tana'
+      passwordRules: [(value) => !!value || this.$t('validation.pwd_required')]
     }
   },
   computed: {
     ...mapGetters({
-      info: 'auth/info',
-      islocked: 'auth/islocked'
+      seed: 'auth/seed',
+      islocked: 'auth/islocked',
+      mnemonicBackup: 'auth/mnemonicBackup',
+      backupJson: 'auth/backupJson'
     }),
+    currentTab() {
+      return this.mnemonicBackup ? 1 : 0
+    },
     filename() {
       const currentDate = moment().format('YYYYMMDD')
-      return `Cybex_default_${currentDate}.bin`
+      return `Cybex_default_${currentDate}.json`
     },
-    wallet() {
-      return this.info ? this.info.wallet : null
-    },
-    accountList() {
-      if (!this.info) {
-        return []
-      }
-      const res = []
-      for (const user of this.info.users) {
-        res.push({
-          name: user.name,
-          accessIsFull: user.full
-        })
-      }
-      return res
-    },
+
     passwordIsValid() {
       return this.password !== ''
     },
@@ -187,15 +110,7 @@ export default {
       }
     },
     tabItems() {
-      const items = this.$route.query.register
-        ? []
-        : [
-            {
-              title: this.$t('tab_label.backup')
-            },
-            { title: this.$t('tab_label.phrase') }
-          ]
-      return items
+      return []
     }
   },
 
@@ -206,13 +121,16 @@ export default {
   },
   mounted() {
     // 检查是否有钱包文件 没有的话弹出提示
-    if (this.info && this.info.wallet) {
+    if (this.backupJson) {
       this.prepareDownloadFile()
     }
   },
   methods: {
+    toggleBackup() {
+      this.$store.commit('auth/needMnemonicBackup', { need: false })
+    },
     copyPhrase() {
-      clipboard.writeText(this.phrase)
+      clipboard.writeText(this.seed)
       this.$message({
         message: this.$t('message.copied')
       })
@@ -224,15 +142,14 @@ export default {
         return false
       }
     },
-    async prepareDownloadFile() {
-      if (!this.wallet) {
+    prepareDownloadFile() {
+      if (!this.backupJson) {
         alert('没有钱包对象')
         return
       }
       if (!this.blob) {
-        const s = await this.wallet.exportBin()
-        this.blob = new Blob([s], {
-          type: 'application/octet-stream; charset=us-ascii'
+        this.blob = new Blob([JSON.stringify(this.backupJson)], {
+          type: 'application/json; charset=utf-8'
         })
       }
     },
@@ -241,24 +158,7 @@ export default {
       if (!this.blob) {
         this.prepareDownloadFile()
       }
-      this.$store.dispatch('auth/downloadBinFile', {})
-    },
-    /**
-     * @param {Boolean} show
-     */
-    togglePhrase(show) {
-      if (show && this.passwordIsValid) {
-        // TODO 验证密码, 获取助记词
-        try {
-          this.phrase = this.info.wallet.getBrainKey(this.password)
-          this.couldCheckphrase = true
-        } catch (e) {
-          this.passwordError = this.$t('validation.pwd_wrong')
-        }
-      } else {
-        this.couldCheckphrase = false
-        this.$store.commit('auth/setNotice', false)
-      }
+      saveAs(this.blob, this.filename)
     }
   },
   head() {
@@ -280,7 +180,7 @@ export default {
 }
 .settings-tab {
   padding: 30px 0;
-
+  background-color: map-get($main, 'dark');
   .sub-title {
     @include f-cybex-style(heavy);
     color: map-get($main, white);
@@ -435,6 +335,9 @@ export default {
       border-radius: 4px;
       height: 56px;
 
+      > * {
+        flex: 1 1 auto !important;
+      }
       &:hover {
         background: map-get($main, hover);
       }

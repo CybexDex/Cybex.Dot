@@ -287,7 +287,7 @@
     "pwd_required": "Enter password",
     "pwd_unmatched": "Password unmatched",
     "pwd_repeat": "Enter password again",
-    "account_not_exists": "Incorrect account name or password",
+    "account_not_exists": "Incorrect password",
     "account_too_short": "Account name should be longer",
     "account_too_long": "Account name too long",
     "account_slash": "Account name should contain at least one dash or a number",

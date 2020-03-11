@@ -287,7 +287,7 @@
     "pwd_required": "请输入密码",
     "pwd_unmatched": "两次输入的密码不一致",
     "pwd_repeat": "请再次输入密码",
-    "account_not_exists": "账户名或密码错误",
+    "account_not_exists": "密码错误",
     "account_too_short": "账户名过短",
     "account_too_long": "账户名过长",
     "account_slash": "账户名必须至少包含一个数字或横杠",
