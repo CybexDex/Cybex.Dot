@@ -135,7 +135,7 @@ export default {
         return this.showUnlock
       },
       set(value) {
-        this.$toggleLock()
+        this.$toggleLock(value)
       }
     }
   },
@@ -153,27 +153,24 @@ export default {
   methods: {
     async onUnlockClicked() {
       this.unlocking = true
-      await this.$store
-        .dispatch('auth/unlock', { password: this.password })
-        .then((res) => {
-          if (res) {
-            this.$nextTick(() => {
-              this.$message({
-                message: this.$t('message.unlock_succ')
-              })
+      try {
+        const result = await this.$store.dispatch('auth/unlock', {
+          password: this.password,
+          toggleDialog: true
+        })
+        if (result) {
+          this.$nextTick(() => {
+            this.$message({
+              message: this.$t('message.unlock_succ')
             })
-          } else {
-            this.someErr = true
-            this.$refs.form.validate()
-          }
-        })
-        .catch((e) => {
-          this.someErr = true
-          this.$refs.form.validate()
-        })
-        .finally(() => {
-          this.unlocking = false
-        })
+          })
+        }
+      } catch (e) {
+        this.someErr = true
+        this.$refs.form.validate()
+      } finally {
+        this.unlocking = false
+      }
     },
     checkPwd(value) {
       if (this.someErr) {

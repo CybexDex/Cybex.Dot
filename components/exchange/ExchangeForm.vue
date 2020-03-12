@@ -346,6 +346,8 @@ export default {
       coinsMap: 'user/coins',
       coinsInvert: 'user/coinsInvert',
       username: 'auth/username',
+      accountId: 'auth/address',
+
       baseCurrency: 'exchange/base',
       quoteCurrency: 'exchange/quote',
       // base_id: 'exchange/base_id',
@@ -579,8 +581,8 @@ export default {
       const hash = this.isBuy
         ? CybexDotClient.baseTokenHash
         : CybexDotClient.quoteTokenHash
-      const balance = await CybexDotClient.getBalance(hash)
-      this.balances = balance.freeBalance
+      const balance = await CybexDotClient.getBalance(hash, this.accountId)
+      this.balances = balance ? balance.freeBalance : null
     },
     async initBalanceAndFee() {
       const func = async () => {
@@ -696,10 +698,11 @@ export default {
       this.amount = parseFloat(this.amount).toFixed(this.amountdigits)
       this.total = parseFloat(this.total).toFixed(this.totaldigits)
       // 检查用户是否已锁
-      if (this.islocked) {
+
+      if (this.isLocked) {
         // 弹出解锁框
-        this.needconfirmdialog = true
-        this.$toggleLock()
+        this.needConfirmDialog = true
+        this.$toggleLock(true)
       } else {
         this.confirmForm = true
         this.couldConfirmCreateTrade = true

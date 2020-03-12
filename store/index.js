@@ -29,8 +29,8 @@ export const mutations = {
   CLOSE_MSG(state) {
     state.showMsg = false
   },
-  TOGGLE_UNLOCK(state) {
-    state.showUnlock = !state.showUnlock
+  TOGGLE_UNLOCK(state, val) {
+    state.showUnlock = val
   },
   TOGGLE_LOGOUT(state, val) {
     if (val !== undefined && val !== null) {

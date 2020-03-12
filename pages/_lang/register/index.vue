@@ -350,10 +350,10 @@ export default {
       }
       return true
     },
-    createAccount() {
+    async createAccount() {
       if (this.$refs.form.validate()) {
         this.inRegister = true
-        this.$store.dispatch('auth/register', {
+        await this.$store.dispatch('auth/register', {
           username: this.name,
           password: this.password
         })

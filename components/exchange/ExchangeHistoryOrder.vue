@@ -241,6 +241,7 @@ export default {
       coinMap: 'user/coins',
       coinsInvert: 'user/coinsInvert',
       username: 'auth/username',
+      accountId: 'auth/address',
       baseCurrency: 'exchange/base',
       quoteCurrency: 'exchange/quote',
       // base_id: 'exchange/base_id',
@@ -607,7 +608,7 @@ export default {
         // closed orders
         const closedRows = await CybexDotClient.getOrders(
           CybexDotClient.TradePairHash,
-          CybexDotClient.AccountId,
+          this.accountId,
           false
         )
         this.isLoading = false

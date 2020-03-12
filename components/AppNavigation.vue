@@ -350,15 +350,13 @@ export default {
       return items
     },
     async onUnlockClicked() {
-      await this.$store
-        .dispatch('auth/toggleLock', this.$i18n.path('/'))
-        .then((res) => {
-          if (res) {
-            this.$message({
-              message: this.$t('message.locked_succ')
-            })
-          }
+      const locked = await this.$store.dispatch('auth/toggleLock')
+
+      if (locked) {
+        this.$message({
+          message: this.$t('message.locked_succ')
         })
+      }
     },
     getLinkClass(path) {
       let isActive = this.$route.path.includes(path)

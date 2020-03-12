@@ -314,6 +314,8 @@ export default {
       coinMap: 'user/coins',
       //   coinMapInvert: 'user/coinsInvert',
       username: 'auth/username',
+      accountId: 'auth/address',
+
       //   baseCurrency: 'exchange/base',
       //   quoteCurrency: 'exchange/quote',
       //   isLocked: 'auth/islocked',
@@ -421,7 +423,7 @@ export default {
       if (this.isLocked) {
         // 弹出解锁狂
         this.needCancelDialog = true
-        this.$toggleLock()
+        this.$toggleLock(true)
       } else {
         this.confirmDialog = true
       }
@@ -509,7 +511,7 @@ export default {
 
         const openRows = await CybexDotClient.getOrders(
           CybexDotClient.TradePairHash,
-          CybexDotClient.AccountId,
+          this.accountId,
           true
         )
 

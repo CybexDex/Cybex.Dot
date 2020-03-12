@@ -189,12 +189,12 @@ export default {
         this.invalidRestoreObjMessages = []
       }
     },
-    createNewWallet() {
+    async createNewWallet() {
       if (!this.formIsValid) {
         return
       }
       try {
-        const result = this.$store.dispatch('auth/register', {
+        const result = await this.$store.dispatch('auth/register', {
           username: this.name,
           password: this.password,
           mnemonic: this.restoreObj

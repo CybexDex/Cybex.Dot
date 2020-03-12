@@ -131,31 +131,6 @@ export default {
           .catch(reject)
         // TODO: how to check
       })
-    },
-    importPrivateKeyIntoWallet() {
-      this.$eventHandle(
-        () => {
-          return this.$store.dispatch('auth/importPrivateKey', {
-            password: this.walletPass,
-            key: this.privateKey
-          })
-          // TODO 导入
-        },
-        [],
-        { user: false }
-      )
-        .then((res) => {
-          this.$router.push(this.$i18n.path('/settings/success/import'))
-        })
-        .catch((e) => {
-          const errmsg = e.msg
-            ? e.msg
-                .split('.')
-                .slice(1)
-                .join('_')
-            : e.message
-          this.invalidMessage = [this.$t('error.' + errmsg)]
-        })
     }
   },
   head() {

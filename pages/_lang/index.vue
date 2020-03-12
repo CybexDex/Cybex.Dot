@@ -159,7 +159,7 @@ export default {
       console.log('redirect to ', url)
       this.$router.push(url)
     },
-    login(event) {
+    async login(event) {
       if (!this.couldLogin) {
         return false
       }
@@ -168,7 +168,7 @@ export default {
       // try {
       // console.log(" this.file ", this.file);
       try {
-        const result = this.$store.dispatch('auth/login', {
+        const result = await this.$store.dispatch('auth/login', {
           json: this.file,
           password: this.password
         })

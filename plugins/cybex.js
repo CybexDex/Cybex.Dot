@@ -132,8 +132,8 @@ export default ({ store, app, route }) => {
   Vue.prototype.$message = ({ type, message, delay }) => {
     store.commit('SHOW_MSG', { type, message, delay })
   }
-  Vue.prototype.$toggleLock = () => {
-    store.commit('TOGGLE_UNLOCK')
+  Vue.prototype.$toggleLock = (showUnlocked) => {
+    store.commit('TOGGLE_UNLOCK', showUnlocked)
   }
 
   Vue.prototype.$toggleLogout = () => {

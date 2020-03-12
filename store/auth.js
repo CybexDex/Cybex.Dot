@@ -1,12 +1,14 @@
 // import UserStorageService from '~/lib/storage'
 import Wallet from '~/lib/wallet'
+import CybexDotClient from '~/lib/CybexDotClient'
+
 import UserStorageService from '~/lib/storage'
 
 // auth.js
 // 用户身份验证 解锁等相关逻辑
 export const state = () => ({
   username: null, // 当前用户,
-  islocked: null,
+  islocked: true,
   seed: null,
   address: null,
   backupJson: null,
@@ -48,7 +50,7 @@ export const mutations = {
     state.backupJson = backupJson
   },
   SET_Locked(state, lock) {
-    state.lock = lock
+    state.islocked = lock
   }
 
   // async setNotice(state, val) {
@@ -61,26 +63,29 @@ export const mutations = {
 }
 
 export const actions = {
+  // after register unlocked
   register({ dispatch, commit }, { username, password, mnemonic }) {
-    const { address, seed, json } = Wallet.CreateWallet(
+    const { address, seed, json, pair } = Wallet.CreateWallet(
       username,
       password,
       mnemonic
     )
 
-    if (address && seed && json) {
+    if (address && seed && json && pair) {
       commit('SET_SEED', seed)
       commit('needMnemonicBackup', { need: true })
       // commit('setNotice', { val: true })
       dispatch('accountInit', {
         username,
         address,
+        password,
         json
       })
       return true
     }
     return false
   },
+  // after login locked
   login({ dispatch }, { json, password }) {
     const pair = Wallet.addAccount(json, password)
 
@@ -90,6 +95,7 @@ export const actions = {
       dispatch('accountInit', {
         username,
         address: pair.address,
+        password,
         json
       })
       return true
@@ -97,7 +103,11 @@ export const actions = {
       return false
     }
   },
-  accountInit({ commit, state, rootState }, { username, address, json }) {
+  // unlock and start timer
+  accountInit(
+    { commit, state, rootState },
+    { username, address, password, json }
+  ) {
     commit('initAuthInfo', {
       username,
       address,
@@ -105,9 +115,16 @@ export const actions = {
     })
 
     this.$cookies.set('auth-username', username)
+    this.$cookies.set('auth-address', address)
 
     new UserStorageService().setLocalWalletName(username)
     new UserStorageService().setCurrentAddress(address)
+
+    this._vm.$wallet.unlock(address, password)
+    const pair = Wallet.getPair(address)
+    if (pair) {
+      CybexDotClient.setSignAccount(pair)
+    }
   },
   async loadLocalWallet({ commit, state, rootState }) {
     const username = new UserStorageService().getLocalWalletName()
@@ -121,21 +138,43 @@ export const actions = {
           address,
           json: JSON.parse(json)
         })
+        this.$cookies.set('auth-username', username)
+        this.$cookies.set('auth-address', address)
+
+        const pair = Wallet.getPair(address)
+        console.log('setSignAccount', address, pair)
+
+        if (pair) {
+          CybexDotClient.setSignAccount(pair)
+        }
       }
     } else {
       await Wallet.loadCached()
     }
   },
   // 切换 锁状态
-
+  // return locked
   toggleLock({ commit, state }, noLoginPage) {
-    if (Wallet.switchLockState(state.address)) {
-      this._vm.$toggleLock() // 打开 UnlockDialog 输入密码
+    if (this._vm.$wallet.switchLockState(state.address)) {
+      this._vm.$toggleLock(true) // 打开 UnlockDialog 输入密码
+
+      return false
     } else {
-      commit('SET_Locked', true)
+      return true
     }
   },
+  unlock({ state }, { password, toggleDialog = false }) {
+    const result = this._vm.$wallet.unlock(state.address, password)
+    if (result && toggleDialog) {
+      this._vm.$toggleLock(false)
+    }
+  },
+  lock({ state }) {
+    this._vm.$wallet.lock(state.address)
+  },
   logout({ commit, state }, { redirect, showLogout }) {
+    this._vm.$wallet.lock(state.address)
+
     Wallet.forgetCurrentAccount(state.address)
 
     commit('initAuthInfo', {
@@ -145,14 +184,23 @@ export const actions = {
     })
 
     this.$cookies.remove('auth-username')
+    this.$cookies.remove('auth-address')
+
     new UserStorageService().removeCurrentAddress()
     new UserStorageService().removeLocalWalletName()
 
+    CybexDotClient.setSignAccount(null)
     if (showLogout) {
       this._vm.$toggleLogout()
     }
     if (redirect) {
       this.$router.push(redirect)
     }
+  },
+  getUnlockPeriod(_, address) {
+    return UserStorageService.getUnlockPeriod(address)
+  },
+  setUnlockPeriod(_, { address, val }) {
+    return UserStorageService.setUnlockPeriod(address, val)
   }
 }

@@ -224,6 +224,7 @@ export default {
       coinMap: 'user/coins',
       coinsInvert: 'user/coinsInvert',
       username: 'auth/username',
+      accountId: 'auth/address',
       baseCurrency: 'exchange/base',
       asset_is_custom: 'exchange/asset_is_custom',
       quoteCurrency: 'exchange/quote',
@@ -475,7 +476,7 @@ export default {
         let tradeRows = await CybexDotClient.getTrades(
           CybexDotClient.TradePairHash,
           20,
-          CybexDotClient.AccountId
+          this.accountId
         )
         this.isLoading = false
         tradeRows = tradeRows.map((v) => {
