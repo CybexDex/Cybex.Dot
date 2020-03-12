@@ -57,8 +57,6 @@ export default {
       ev.preventDefault()
     },
     drop(ev) {
-      console.log('File(s) dropped')
-
       // Prevent default behavior (Prevent file from being opened)
       ev.preventDefault()
       if (ev.dataTransfer.items) {
@@ -67,7 +65,6 @@ export default {
           // If dropped items aren't files, reject them
           if (ev.dataTransfer.items[i].kind === 'file') {
             const file = ev.dataTransfer.items[i].getAsFile()
-            console.log('... file[' + i + '].name = ' + file.name)
             this.file = file
           }
         }
@@ -77,9 +74,6 @@ export default {
         for (let i = 0; i < ev.dataTransfer.files.length; i++) {
           const file = ev.dataTransfer.files[i]
           this.file = file
-          console.log(
-            '... file[' + i + '].name = ' + ev.dataTransfer.files[i].name
-          )
         }
         this.$emit('file-changed', this.file)
       }

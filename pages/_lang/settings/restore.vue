@@ -200,10 +200,6 @@ export default {
           mnemonic: this.restoreObj
         })
         if (result) {
-          console.log(
-            'redirect to ',
-            this.$i18n.path('/settings/success/restore')
-          )
           this.$router.push(this.$i18n.path('/settings/success/restore'))
         }
       } catch (e) {

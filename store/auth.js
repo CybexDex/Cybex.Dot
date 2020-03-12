@@ -142,7 +142,6 @@ export const actions = {
         this.$cookies.set('auth-address', address)
 
         const pair = Wallet.getPair(address)
-        console.log('setSignAccount', address, pair)
 
         if (pair) {
           CybexDotClient.setSignAccount(pair)

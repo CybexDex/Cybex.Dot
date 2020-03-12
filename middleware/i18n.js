@@ -3,7 +3,6 @@ import { find } from 'lodash'
 export default function({ isHMR, app, store, params, error, route, redirect }) {
   // If middleware is called from hot module replacement, ignore it
   if (isHMR) return
-  console.log('--', store.getters['auth/username'])
 
   const storeLocale = store.getters['i18n/locale']
   const locale = params.lang || app.i18n.fallbackLocale
