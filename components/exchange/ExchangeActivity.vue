@@ -1,9 +1,9 @@
 <template>
   <div>
-    <v-flex d-flex class="exchange-activity" justify-space-around>
+    <v-flex d-flex class="exchange-activity" justify-space-between>
       <!-- 正常交易市场显示选择下拉 -->
       <!-- 交易大赛显示固定交易选择 -->
-      <!-- <MarketPanel v-if="!mode" /> -->
+      <MarketPanel />
       <div class="item column">
         <div class="exchange-list-head">
           {{ $t('exchange.content.latest-price') }}
@@ -75,7 +75,7 @@ import { mapGetters } from 'vuex'
 import utils from '~/components/mixins/utils'
 export default {
   components: {
-    // MarketPanel: () => import('~/components/MarketPanel.vue')
+    MarketPanel: () => import('~/components/MarketPanel.vue')
   },
   mixins: [utils],
   props: {
@@ -163,7 +163,6 @@ export default {
   height: $activity-height;
   align-items: center;
   box-shadow: inset 0 -1px 0 0 #111621;
-  padding-left: 200px;
   a {
     text-decoration: none;
     color: white;

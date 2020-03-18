@@ -466,6 +466,11 @@ $input-tiny: (
             padding: 9px 0 7px;
           }
         }
+        .v-input__slot:before,
+        .v-input__slot:after {
+          border-style: none;
+          visibility: hidden;
+        }
       }
 
       .v-text-field__details {

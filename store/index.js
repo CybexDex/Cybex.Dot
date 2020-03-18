@@ -16,7 +16,8 @@ export const getters = {
   showLogout: (state) => state.showLogout,
   msgContent: (state) => state.msgContent,
   msgType: (state) => state.msgType,
-  msgDelay: (state) => state.msgDelay
+  msgDelay: (state) => state.msgDelay,
+  dwCoinType: (state) => state.dwCoinType
 }
 
 export const mutations = {

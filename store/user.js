@@ -159,5 +159,8 @@ export const actions = {
     if (tab === 0 || tab === 1) {
       commit('UPDATE_ASSET_TAB', { username, tab })
     }
+  },
+  loadAssets({ state, commit }, username) {
+    // commit('SET_ASSETS', newArr)
   }
 }

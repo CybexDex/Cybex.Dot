@@ -108,7 +108,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { reverse, maxBy, concat, take, takeRight } from 'lodash'
+import { maxBy, concat, take, takeRight } from 'lodash'
 import utils from '~/components/mixins/utils'
 import CybexDotClient from '~/lib/CybexDotClient.js'
 
@@ -461,110 +461,6 @@ export default {
         this.intervalRTE = setInterval(async () => {
           await func()
         }, this.refreshRate)
-      }
-    },
-
-    async getRTEDataByDigits() {
-      if (!(this.base_id && this.quote_id)) {
-        return
-      }
-      const func = async () => {
-        // 监听网络状态
-        const v = this.cybexjs.all_status()
-        this.$store.commit('exchange/SET_NETSTATUS', v)
-
-        const singleEle = this.rowHeight
-        if (this.$refs.container) {
-          let h
-          if (this.order === 'all') {
-            h = Math.floor(this.rowsFullHeight / singleEle)
-            this.rteRows = Math.ceil(h / 2)
-          } else if (this.order === 'buy') {
-            h = Math.floor(this.rowsFullHeight / singleEle)
-            this.rteRows = h
-          } else {
-            h = Math.floor(this.rowsFullHeight / singleEle)
-            this.rteRows = h
-          }
-          const sellRows = []
-          const buyRows = []
-          const emptyItem = {
-            price: null,
-            amount: null,
-            total: null
-          }
-          // console.log(
-          //   "rte参数",
-          //   this.base_id,
-          //   this.quote_id,
-          //   this.currentGroupDecimal,
-          //   this.rteRows
-          // );
-          const rteData = await this.cybexjs.getDepth(
-            this.base_id,
-            this.quote_id,
-            this.currentGroupDecimal,
-            this.rteRows
-          )
-          if (rteData !== null && rteData !== {}) {
-            // sell - ask
-            // buy - bid
-            // console.log('rteData.price', rteData.price);
-            if (Object.prototype.hasOwnProperty.call(rteData, 'price')) {
-              const currentOrderPrice = rteData.price ? rteData.price : 0
-              const currentOrderLegalPrice = null
-              // 如果是自定义交易对
-              // 不需要显示法币价格
-
-              this.$store.commit('exchange/SET_CURRENT_RTE_PRICE', {
-                price: currentOrderPrice,
-                legalPrice: currentOrderLegalPrice
-              })
-            } else {
-              this.$store.commit('exchange/SET_CURRENT_RTE_PRICE', {
-                price: 0,
-                legalPrice: 0
-              })
-            }
-            if (rteData.asks && rteData.asks.length) {
-              for (let i = this.rteRows - 1; i >= 0; i--) {
-                const ask = rteData.asks[i]
-                if (ask) {
-                  sellRows[i] = {
-                    price: parseFloat(ask[0]),
-                    amount: parseFloat(ask[1]),
-                    total: parseFloat(ask[2])
-                  }
-                } else {
-                  sellRows[i] = emptyItem
-                }
-              }
-            }
-            if (rteData.bids && rteData.bids.length) {
-              for (let i = 0; i < this.rteRows; i++) {
-                const bid = rteData.bids[i]
-                if (bid) {
-                  buyRows[i] = {
-                    price: parseFloat(bid[0]),
-                    amount: parseFloat(bid[1]),
-                    total: parseFloat(bid[2])
-                  }
-                } else {
-                  buyRows[i] = emptyItem
-                }
-              }
-            }
-            this.orderBuyRows = buyRows
-            this.orderSellRows = reverse(sellRows)
-            this.calculatePosition(buyRows, sellRows)
-          }
-        }
-      }
-      await func()
-      if (!this.intervalRTE) {
-        this.intervalRTE = setInterval(async () => {
-          await func()
-        }, 500)
       }
     }
   }

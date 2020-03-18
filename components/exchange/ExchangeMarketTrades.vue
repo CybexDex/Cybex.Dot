@@ -116,15 +116,7 @@ export default {
         this.intervalMarketTrade = null
       }
     },
-    // 换算法币价格
-    // async getCurrentOrderLegalPrice() {
-    //   // 换算法币价格
-    //   if (!this.base_id || !this.currentOrderPrice) return;
-    //   this.currentOrderLegalPrice = await this.cybexjs.assetValue(
-    //     this.base_id,
-    //     this.currentOrderPrice
-    //   );
-    // },
+
     async fetchSubstrateMarketTrades() {
       const func = async () => {
         const trades = await CybexDotClient.getTrades(
@@ -140,29 +132,6 @@ export default {
             time: t.datetime
           }
         })
-      }
-      await func()
-      // console.log(">>>>>> Market Trades 实时交易数据", this.trades);
-      if (!this.intervalMarketTrade) {
-        this.intervalMarketTrade = setInterval(async function() {
-          await func()
-        }, this.tradesRefreshRate)
-      }
-    },
-
-    async fetchMarketTrades(base, quote) {
-      const func = async () => {
-        let row = 50
-        if (this.$refs.rowsContent) {
-          row = this.$refs.rowsContent.clientHeight > 1000 ? 100 : 50
-        }
-        const trades = await this.cybexjs.order_history(base, quote, row)
-        this.trades = trades || []
-        // 最后成交价格
-        // console.log('trades', trades);
-        this.currentOrderPrice = trades.length
-          ? parseFloat(trades[0].price)
-          : null
       }
       await func()
       // console.log(">>>>>> Market Trades 实时交易数据", this.trades);

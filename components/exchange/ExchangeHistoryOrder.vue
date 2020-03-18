@@ -117,7 +117,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { map } from 'lodash'
 import moment from 'moment'
 
 import utils from '~/components/mixins/utils'
@@ -562,31 +561,6 @@ export default {
       return filter
     },
 
-    async mapRowAssetDigits(rows) {
-      // 增加资产精度
-      await Promise.all(
-        map(rows, async (item, idx) => {
-          const k = 'asset-' + item.market.base
-          const k2 = 'asset-' + item.market.quote
-          if (!this.staticDigits[k]) {
-            const r = await this.cybexjs.queryAsset(item.market.base)
-            this.staticDigits[k] = r.precision
-          }
-          if (!this.staticDigits[k2]) {
-            const r = await this.cybexjs.queryAsset(item.market.quote)
-            this.staticDigits[k2] = r.precision
-          }
-          rows[idx].asset_digit_base = this.staticDigits[k]
-          rows[idx].asset_digit_quote = this.staticDigits[k2]
-          // price精度
-          const dp = this.digitsPrice(item)
-          rows[idx].asset_digit_price = dp
-          // amount精度
-          const da = this.digitsAmount(item)
-          rows[idx].asset_digit_amount = da
-        })
-      )
-    },
     async fetchOrderHistory(cleanRows = true, showLoading = false) {
       if (!this.username) {
         this.rowsData = []

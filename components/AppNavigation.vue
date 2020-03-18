@@ -69,8 +69,7 @@
             v-for="(item, index) in funditems"
             :key="index"
             :class="getLinkClass(item.path)"
-            :to="item.path"
-            nuxt
+            @click="$i18n.jumpTo(item.path)"
           >
             <v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
           </v-list-item>
@@ -186,7 +185,13 @@
         </div>
       </v-flex>
       <!-- language select -->
-      <v-menu transition="'fade-transition'" offset-y auto open-on-hover>
+      <v-menu
+        content-class="nav-menu"
+        transition="'fade-transition'"
+        offset-y
+        auto
+        open-on-hover
+      >
         <template v-slot:activator="{ on }">
           <v-btn
             active-class="v-menu__activator--active"
@@ -315,10 +320,6 @@ export default {
         {
           title: 'nav.transfer_history',
           path: '/fund/history'
-        },
-        {
-          title: 'nav.rebates',
-          path: '/rebates'
         }
       ]
     }
@@ -383,14 +384,61 @@ export default {
 <style lang="scss">
 @import '~/assets/style/_vars/_colors';
 @import '~/assets/style/_fonts/_font_mixin';
+.v-menu__content.theme--dark .theme--dark.v-sheet {
+  background-color: map-get($main, anchor) !important;
+  padding: 8px auto !important;
 
-.v-menu__content {
+  .v-list-item {
+    padding: 0px;
+    min-height: 32px;
+    text-align: center;
+    .v-list-item__title {
+      font-size: 12px;
+    }
+  }
+}
+.theme--dark.v-list-item--active:hover::before,
+.theme--dark.v-list-item--active::before {
+  opacity: 1;
+}
+.theme--dark.v-text-field > .v-input__control > .v-input__slot:before,
+.theme--dark.v-text-field > .v-input__control > .v-input__slot:after {
+  border-style: none;
+  visibility: hidden;
+}
+.theme--dark.v-text-field > .v-input__control > .v-input__slot {
+  background-color: map-get($main, anchor) !important;
+  box-shadow: none;
+}
+
+.v-text-field.v-text-field--solo:not(.v-text-field--solo-flat)
+  > .v-input__control
+  > .v-input__slot {
+  box-shadow: none;
+}
+
+.theme--dark.v-input--checkbox
+  > .v-input__control
+  > .v-input__slot
+  > .theme--dark.v-label {
+  font-size: 12px;
+}
+
+.theme--dark.v-text-field
+  > .v-input__control
+  > .v-input__slot
+  > .v-text-field__slot {
+  .v-label {
+    font-size: 12px;
+  }
+  font-size: 12px;
+}
+
+.nav-menu.v-menu__content {
   margin-left: 12px;
+  margin-top: 0px;
 }
 
-.v-list {
-  padding: 0;
-}
 .cybex-nav {
   .v-tabs-bar__content {
     background: map-get($main, lead);

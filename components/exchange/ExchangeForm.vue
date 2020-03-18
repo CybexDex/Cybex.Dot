@@ -503,15 +503,13 @@ export default {
         this.initBalanceAndFee()
       }
     },
-    async price(newV, oldV) {
+    price(newV, oldV) {
       // input输出字符串, 通过计算得到的为float
       // 若值相等，视作没有变化
       if (oldV === newV) return
       // 自定义资产无法币价格
       if (!this.isNumberValue(newV) || parseFloat(newV) === 0) {
         this.legalPrice = null
-      } else if (this.base_id) {
-        await this.getLegalPrice()
       }
     },
     formData(newV, oldV) {
@@ -640,15 +638,6 @@ export default {
     },
     // 获取对应法币价格
 
-    async getLegalPrice() {
-      if (!this.base_id && !this.price && !this.locale) return
-      const p = await this.cybexjs.assetValue(
-        this.base_id,
-        this.price,
-        this.locale === 'en' ? this.prefix + 'USDT' : null
-      )
-      this.legalPrice = this.$options.filters.legalDigits(p, this.symbol)
-    },
     isNumberValue(v) {
       return v !== null && !isNaN(v) && v !== '' && typeof v !== 'undefined'
     },

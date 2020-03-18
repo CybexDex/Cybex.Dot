@@ -24,6 +24,7 @@ const filters = {
     }
     return oldP.substr(0, maxPrecision)
   },
+
   localDate: (d, f) => {
     const local = moment.utc(d).local()
 

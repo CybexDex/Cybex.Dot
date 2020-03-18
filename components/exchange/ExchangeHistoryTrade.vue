@@ -120,7 +120,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { map } from 'lodash'
 import utils from '~/components/mixins/utils'
 import CybexDotClient from '~/lib/CybexDotClient.js'
 
@@ -377,34 +376,7 @@ export default {
         this.isLoading = false
       }, time)
     },
-    async mapRowAssetDigits(rows) {
-      // 增加资产精度
-      await Promise.all(
-        map(rows, async (item, idx) => {
-          const k = 'asset-' + item.market.base
-          const k2 = 'asset-' + item.market.quote
-          if (!this.staticDigits[k]) {
-            const r = await this.cybexjs.queryAsset(item.market.base)
-            this.staticDigits[k] = r.precision
-          }
-          if (!this.staticDigits[k2]) {
-            const r = await this.cybexjs.queryAsset(item.market.quote)
-            this.staticDigits[k2] = r.precision
-          }
-          // base quote的默认资产精度
-          // 根据买卖方向选择不同
-          rows[idx].asset_digit_base = this.staticDigits[k]
-          rows[idx].asset_digit_quote = this.staticDigits[k2]
 
-          // price精度
-          const dp = this.digitsPrice(item)
-          rows[idx].asset_digit_price = dp
-          // amount精度
-          const da = this.digitsAmount(item)
-          rows[idx].asset_digit_amount = da
-        })
-      )
-    },
     digitsPrice(item) {
       const base =
         item && item.market
