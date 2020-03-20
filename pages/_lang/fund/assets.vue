@@ -57,10 +57,13 @@
     <br />
     <v-layout row wrap>
       <v-flex xs12>
-        <v-tabs v-model="activeTab" slider-color="cybex" dark>
-          <v-tab v-for="(tab, index) in tabItems" :key="index" ripple>{{
-            tab
-          }}</v-tab>
+        <v-tabs v-model="activeTab" slider-color="cybex" dark height="40">
+          <v-tab
+            v-for="(tab, index) in tabItems"
+            :key="index"
+            :ripple="false"
+            >{{ tab }}</v-tab
+          >
           <v-tab-item>
             <asset-list />
           </v-tab-item>

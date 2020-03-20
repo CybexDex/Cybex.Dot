@@ -2,10 +2,13 @@
   <v-flex class="login-bg">
     <div class="login-wrapper">
       <div class="main_tlt text-left mt-0">{{ $t('title.welcome') }}</div>
-      <div
-        class="sub_tlt text-left"
-        v-html="$t('sub_title.jump_to_reg', { url: '/register' })"
-      />
+      <i18n path="sub_title.jump_to_reg" tag="div" class="sub_tlt text-left">
+        <template v-slot:action>
+          <a :href="`javascript:jumpTo('/register')`">{{
+            $t('sub_title.user_register')
+          }}</a>
+        </template>
+      </i18n>
       <div class="login_tlt text-left">
         {{ $t('button.wallet_login', { mode: $t('wallet.Local') }) }}
       </div>
@@ -156,7 +159,6 @@ export default {
       // 云钱包跳转到登录前页面或者交易所
       const url = fromUrl ?? this.$i18n.path('/exchange')
 
-      console.log('redirect to ', url)
       this.$router.push(url)
     },
     async login(event) {

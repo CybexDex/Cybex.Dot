@@ -384,6 +384,25 @@ export default {
 <style lang="scss">
 @import '~/assets/style/_vars/_colors';
 @import '~/assets/style/_fonts/_font_mixin';
+.theme--dark.v-tabs .v-tab--active:hover::before,
+.theme--dark.v-tabs .v-tab--active::before {
+  opacity: 0;
+}
+
+.theme--dark.v-tabs .v-tab {
+  font-size: 12px;
+  @include f-cybex-style(heavy);
+}
+
+.v-tab:not(.v-tab--active):before {
+  background-color: transparent;
+  transition: none;
+}
+
+.v-tab:before {
+  transition: none;
+}
+
 .v-menu__content.theme--dark .theme--dark.v-sheet {
   background-color: map-get($main, anchor) !important;
   padding: 8px auto !important;

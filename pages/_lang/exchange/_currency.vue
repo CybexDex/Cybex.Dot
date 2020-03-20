@@ -8,7 +8,7 @@
       <Chart />
       <client-only>
         <v-flex class="orders-area">
-          <v-tabs v-model="currentTab" slider-color="cybex" dark>
+          <v-tabs v-model="currentTab" slider-color="cybex" dark height="40">
             <v-tab :ripple="false">
               {{ $t('exchange.order-table.tab-title.open-order') }}
               <!-- 数字与汉字无法行内对齐 添加特殊样式 -->

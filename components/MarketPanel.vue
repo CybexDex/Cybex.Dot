@@ -9,7 +9,7 @@
   >
     <!-- 交易对名字显示开始 -->
     <template
-      v-slot:activator="on"
+      v-slot:activator="{ on }"
       :grow="1"
       :shrink="1"
       d-flex
@@ -56,7 +56,7 @@
         <v-tab
           v-for="(item, index) in tabItems"
           :key="index"
-          ripple
+          :ripple="false"
           @click="onBaseChanged(index)"
         >
           <asset-pairs v-if="item && item.asset_id" :asset-id="item.asset_id" />
@@ -531,9 +531,7 @@ export default {
     try {
       Promise.all([await this.loadAllBases()]).then(() => {})
       // await this.loadAllBases();
-    } catch (e) {
-      console.error(e)
-    }
+    } catch (e) {}
     loopFlag = setInterval(this.refreshDatas, this.tradesRefreshRate)
   },
 
@@ -560,8 +558,6 @@ export default {
       this.resetScrollbar(`.asset-dropdown.ps-dropdown-${type} .v-select-list`)
     },
     showPanelHandler() {
-      console.log('clicked')
-
       this.showMarket = !this.showMarket
     },
     resetScrollbar(key) {
@@ -581,7 +577,6 @@ export default {
       }
       this.showMarket = false
 
-      console.log(`redirect to /exchange/${item.quotename}_${item.basename}`)
       this.$i18n.jumpTo(`/exchange/${item.quotename}_${item.basename}`)
     },
     onBaseChanged(value) {

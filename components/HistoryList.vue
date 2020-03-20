@@ -228,7 +228,6 @@ export default {
           // this.page = Math.floor((this.total - data.total) / this.size) + 1;
         })
         .catch((e) => {
-          console.error(e)
           this.history = null
         })
         .finally(() => {

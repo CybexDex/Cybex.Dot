@@ -15,6 +15,7 @@
         small
         height="40"
         align-items-center
+        :ripple="false"
       >
         <div slot="label" class="check-label">
           {{ $t('form_label.hide_small') }}
@@ -137,9 +138,12 @@
                           content-class="why-forbid-tip"
                           top
                         >
-                          <span slot="activator" class="op-item">{{
-                            $t('button.pause')
-                          }}</span>
+                          <template v-slot:activator="{ on }">
+                            <span class="op-item" v-on="on">{{
+                              $t('button.pause')
+                            }}</span>
+                          </template>
+
                           <span>{{
                             (props.item.whyNotDeposit || {})[
                               `${localeShort}Msg`
@@ -174,9 +178,12 @@
                           content-class="why-forbid-tip"
                           top
                         >
-                          <span slot="activator" class="op-item">{{
-                            $t('button.pause')
-                          }}</span>
+                          <template v-slot:activator="{ on }">
+                            <span class="op-item" v-on="on">{{
+                              $t('button.pause')
+                            }}</span>
+                          </template>
+
                           <span>{{
                             (props.item.whyNotWithdraw || {})[
                               `${localeShort}Msg`
@@ -365,18 +372,14 @@ export default {
     async assetList() {
       try {
         await this.setupAssetList()
-      } catch (e) {
-        console.log(e)
-      }
+      } catch (e) {}
     }
   },
   async mounted() {
     await this.loadAssets(this.username)
     try {
       await this.setupAssetList()
-    } catch (e) {
-      console.log(e)
-    }
+    } catch (e) {}
   },
   methods: {
     ...mapActions({

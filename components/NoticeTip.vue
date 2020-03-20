@@ -1,6 +1,6 @@
 <template>
   <v-tooltip content-class="generated-tip" :nudge-right="offset" bottom>
-    <template v-slot:activator="on">
+    <template v-slot:activator="{ on }">
       <v-icon
         size="14"
         class="notice-icon"
@@ -9,7 +9,7 @@
         >ic-help</v-icon
       >
     </template>
-    <span>{{ content }}</span>
+    <span style="white-space: pre-wrap;">{{ content }}</span>
   </v-tooltip>
 </template>
 

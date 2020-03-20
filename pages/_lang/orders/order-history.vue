@@ -3,8 +3,8 @@
     <div class="page-head-title mb-0">
       {{ $t('exchange.order-table.tab-title.history-order') }}
     </div>
-    <v-tabs class="asset-tabs" v-model="active" slider-color="cybex" dark>
-      <v-tab v-for="(tabItem, idx) in tabItems" :key="idx">{{
+    <v-tabs v-model="active" class="asset-tabs" slider-color="cybex" dark>
+      <v-tab v-for="(tabItem, idx) in tabItems" :key="idx" ripple="false">{{
         tabItem.title
       }}</v-tab>
       <v-tab-item v-for="(tabItem, idx) in tabItems" :key="idx">
