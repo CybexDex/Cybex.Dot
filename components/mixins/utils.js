@@ -2,19 +2,33 @@
 import { mapGetters } from 'vuex'
 import BigNumber from 'bignumber.js'
 import moment from 'moment'
+import CybexDotClient from '~/lib/CybexDotClient.js'
 
 export default {
+  async mounted() {
+    await CybexDotClient.init()
+    CybexDotClient.setSignAccount(this.signer)
+
+    CybexDotClient.setPair(this.baseHash, this.quoteHash, this.pairHash)
+  },
   data() {
     return {
       dateDisplayFormat: 'YYYY/MM/DD', // 显示用moment日期格式
-      dateXHRFormat: 'YYYY-MM-DDTHH:mm:ss', // 调用接口moment日期格式
-      datepickerFormat: 'YYYY-MM-DD', // 控件需要的moment日期格式
-      staticDigits: {},
-      staticCustomAssetDigits: {}
+      dateXHRFormat: 'YYYY-MM-DDTHH:mm:ss' // 调用接口moment日期格式
     }
   },
   computed: {
-    ...mapGetters({}),
+    ...mapGetters({
+      signer: 'auth/signer',
+
+      pairs: 'exchange/pairs',
+      assets: 'exchange/assets',
+      baseName: 'exchange/baseName',
+      quoteName: 'exchange/quoteName',
+      baseHash: 'exchange/baseHash',
+      quoteHash: 'exchange/quoteHash',
+      pairHash: 'exchange/pairHash'
+    }),
     cookieName() {
       return this.$cookies.get('auth-username')
     }

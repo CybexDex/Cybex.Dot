@@ -120,14 +120,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      locale: 'i18n/locale',
-      baseCurrency: 'exchange/base',
-      quoteCurrency: 'exchange/quote'
-      // base_id: 'exchange/base_id',
-      // quote_id: 'exchange/quote_id'
+      locale: 'i18n/locale'
     }),
     symbol() {
-      return this.baseCurrency + '_' + this.quoteCurrency
+      return this.baseName + '_' + this.quoteName
     },
 
     timeframe() {

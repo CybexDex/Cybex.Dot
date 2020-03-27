@@ -9,9 +9,10 @@ import UserStorageService from '~/lib/storage'
 export const state = () => ({
   username: null, // 当前用户,
   islocked: true,
-  seed: null,
+  seed: null, // 助记词
   address: null,
   backupJson: null,
+  signer: null,
 
   mnemonicBackup: false,
   hasNotice: false // 是否有新通知
@@ -22,6 +23,7 @@ export const getters = {
   seed: (state) => state.seed,
   address: (state) => state.address,
   backupJson: (state) => state.backupJson,
+  signer: (state) => state.signer,
 
   islocked: (state) => state.islocked,
   hasNotice: (state) => state.hasNotice,
@@ -51,8 +53,10 @@ export const mutations = {
   },
   SET_Locked(state, lock) {
     state.islocked = lock
+  },
+  SET_SignerAccount(state, signer) {
+    state.signer = signer
   }
-
   // async setNotice(state, val) {
   //   state.hasNotice = val
   //   if (state.wallet && !val) {
@@ -123,6 +127,7 @@ export const actions = {
     this._vm.$wallet.unlock(address, password)
     const pair = Wallet.getPair(address)
     if (pair) {
+      commit('SET_SignerAccount', pair)
       CybexDotClient.setSignAccount(pair)
     }
   },
@@ -144,6 +149,7 @@ export const actions = {
         const pair = Wallet.getPair(address)
 
         if (pair) {
+          commit('SET_SignerAccount', pair)
           CybexDotClient.setSignAccount(pair)
         }
       }
@@ -188,6 +194,7 @@ export const actions = {
     new UserStorageService().removeCurrentAddress()
     new UserStorageService().removeLocalWalletName()
 
+    commit('SET_SignerAccount', null)
     CybexDotClient.setSignAccount(null)
     if (showLogout) {
       this._vm.$toggleLogout()

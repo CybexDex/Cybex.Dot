@@ -18,7 +18,7 @@
           &nbsp;
           <asset-pairs
             :max-width="'calc(100% - 30px)'"
-            :asset-id="quoteCurrency"
+            :asset-name="quoteName"
           />
         </v-flex>
         <v-flex class="text-lg-right money keep-inline">
@@ -30,7 +30,7 @@
           <span class="unit">
             <asset-pairs
               :max-width="'45%'"
-              :asset-id="isBuy ? baseCurrency : quoteCurrency"
+              :asset-name="isBuy ? baseName : quoteName"
             />
           </span>
         </v-flex>
@@ -57,7 +57,7 @@
               <asset-pairs
                 :color-opacity="0.5"
                 :max-width="'60px'"
-                :asset-id="baseCurrency"
+                :asset-name="baseName"
               />
             </span>
             <span v-if="priceError" class="exchange-form-input-error">{{
@@ -94,7 +94,7 @@
               <asset-pairs
                 :color-opacity="0.5"
                 :max-width="'60px'"
-                :asset-id="quoteCurrency"
+                :asset-name="quoteName"
               />
             </span>
             <span v-if="amountError" class="exchange-form-input-error">{{
@@ -135,7 +135,7 @@
               <asset-pairs
                 :color-opacity="0.5"
                 :max-width="'60px'"
-                :asset-id="baseCurrency"
+                :asset-name="baseName"
               />
             </span>
             <span v-if="totalError" class="exchange-form-input-error">{{
@@ -164,7 +164,7 @@
           <span v-for="(f, i) in fee" v-else :key="i" class="money">
             {{ f.amount }}
             <span class="unit">
-              <asset-pairs :asset-id="f.asse" />
+              <asset-pairs :asset-name="f.asse" />
             </span>
           </span>
           <v-tooltip
@@ -195,7 +195,7 @@
                 : $t('exchange.order-form.title.sell')
             }}
           </div>
-          <asset-pairs :asset-id="quoteCurrency" />
+          <asset-pairs :asset-name="quoteName" />
         </cybex-btn>
         <cybex-btn
           v-else
@@ -209,7 +209,7 @@
               ? $t('exchange.order-form.title.buy')
               : $t('exchange.order-form.title.sell')
           }}
-          <asset-pairs :asset-id="quoteCurrency" />
+          <asset-pairs :asset-name="quoteName" />
         </cybex-btn>
       </template>
     </v-form>
@@ -232,21 +232,21 @@
               >{{ $t('exchange.order-form.label.price') }}:</span
             >
             {{ confirmPrice }}
-            <asset-pairs :asset-id="baseCurrency" />
+            <asset-pairs :asset-name="baseName" />
           </p>
           <p class="line">
             <span class="label"
               >{{ $t('exchange.order-form.label.amount') }}:</span
             >
             {{ amount }}
-            <asset-pairs :asset-id="quoteCurrency" />
+            <asset-pairs :asset-name="quoteName" />
           </p>
           <p class="line">
             <span class="label"
               >{{ $t('exchange.order-form.label.total') }}:</span
             >
             {{ total }}
-            <asset-pairs :asset-id="baseCurrency" />
+            <asset-pairs :asset-name="baseName" />
           </p>
           <p v-if="fee.length > 0" class="line">
             <span class="label"
@@ -341,19 +341,9 @@ export default {
     ...mapGetters({
       locale: 'i18n/locale',
       symbol: 'i18n/symbol',
-      prefix: 'exchange/prefix',
-      // isConnect: 'exchange/connect',
-      coinsMap: 'user/coins',
-      coinsInvert: 'user/coinsInvert',
       username: 'auth/username',
       accountId: 'auth/address',
 
-      baseCurrency: 'exchange/base',
-      quoteCurrency: 'exchange/quote',
-      // base_id: 'exchange/base_id',
-      // quote_id: 'exchange/quote_id',
-      quote_digits: 'exchange/quote_digits',
-      base_digits: 'exchange/base_digits',
       isLocked: 'auth/islocked',
       refreshRate: 'exchange/tradesRefreshRate'
     }),
@@ -576,9 +566,7 @@ export default {
     },
 
     async getAccountBalance() {
-      const hash = this.isBuy
-        ? CybexDotClient.baseTokenHash
-        : CybexDotClient.quoteTokenHash
+      const hash = this.isBuy ? this.baseHash : this.quoteHash
       const balance = await CybexDotClient.getBalance(hash, this.accountId)
       this.balances = balance ? balance.freeBalance : null
     },
@@ -730,7 +718,6 @@ export default {
       this.couldConfirmCreateTrade = false
 
       const result = await CybexDotClient.createLimitOrder(
-        CybexDotClient.TradePairHash,
         this.isBuy,
         this.price,
         this.amount

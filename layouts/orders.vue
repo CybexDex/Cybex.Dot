@@ -19,7 +19,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import PerfectScrollbar from 'perfect-scrollbar'
 export default {
   components: {
@@ -29,11 +28,7 @@ export default {
   data() {
     return { ps: null }
   },
-  computed: {
-    ...mapGetters({
-      basicInited: 'user/inited'
-    })
-  },
+
   mounted() {
     if (!this.ps) {
       this.ps = new PerfectScrollbar('html', { useBothWheelAxes: false })

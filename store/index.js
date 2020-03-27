@@ -5,9 +5,7 @@ export const state = () => ({
   msgDelay: 3000,
   showUnlock: false,
   showLogout: false,
-  showVersion: false,
-  dwCoinType: null,
-  navMenus: { internal: {}, external: {} } // 导航栏设置
+  showVersion: false
 })
 
 export const getters = {
@@ -16,8 +14,7 @@ export const getters = {
   showLogout: (state) => state.showLogout,
   msgContent: (state) => state.msgContent,
   msgType: (state) => state.msgType,
-  msgDelay: (state) => state.msgDelay,
-  dwCoinType: (state) => state.dwCoinType
+  msgDelay: (state) => state.msgDelay
 }
 
 export const mutations = {
@@ -42,12 +39,6 @@ export const mutations = {
   },
   TOGGLE_VERSION(state) {
     state.showVersion = !state.showVersion
-  },
-  UPDATE_DW_COINTYPE(state, cointype) {
-    state.dwCoinType = cointype
-  },
-  SET_NAV_MENUS: (state, menus) => {
-    state.navMenus = Object.assign(state.navMenus, menus)
   }
 }
 

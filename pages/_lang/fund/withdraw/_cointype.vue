@@ -246,12 +246,9 @@ export default {
   computed: {
     ...mapGetters({
       username: 'auth/username',
-      coinMap: 'user/coins',
-      coinsInvert: 'user/coinsInvert',
       islocked: 'auth/islocked',
       showUnlock: 'showUnlock',
-      localeShort: 'i18n/shortcut',
-      assetConfig: 'user/assetConfigBySymbol'
+      localeShort: 'i18n/shortcut'
     }),
     canWithdraw() {
       return (

@@ -309,18 +309,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      //   whitelist: 'user/whitelist',
-      //   bases: 'user/bases',
-      coinMap: 'user/coins',
-      //   coinMapInvert: 'user/coinsInvert',
       username: 'auth/username',
       accountId: 'auth/address',
 
-      //   baseCurrency: 'exchange/base',
-      //   quoteCurrency: 'exchange/quote',
-      //   isLocked: 'auth/islocked',
-      freshRate: 'exchange/tradesRefreshRate'
-      //   innerWidth: 'exchange/innerWidth'
+      freshRate: 'exchange/tradesRefreshRate',
+      innerWidth: 'exchange/innerWidth'
     }),
     limitAssetSize() {
       return this.mode === 'exchange' && this.innerWidth <= 1440
@@ -482,15 +475,6 @@ export default {
             )
           })
       }
-      if (times !== 0) {
-        this.$store.commit('exchange/SET_CONNECT_STATUS', {
-          orderConnect: false
-        })
-      } else {
-        this.$store.commit('exchange/SET_CONNECT_STATUS', {
-          orderConnect: true
-        })
-      }
     },
     async fetchOrderHistory(cleanRows = true, showLoading = false) {
       if (!this.username) {
@@ -509,11 +493,7 @@ export default {
         // open orders
         // console.log('this.currentFilter', this.currentFilter);
 
-        const openRows = await CybexDotClient.getOrders(
-          CybexDotClient.TradePairHash,
-          this.accountId,
-          true
-        )
+        const openRows = await CybexDotClient.getOrders(this.accountId, true)
 
         this.isLoading = false
         this.rowsData = openRows

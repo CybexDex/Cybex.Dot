@@ -236,15 +236,9 @@ export default {
   },
   computed: {
     ...mapGetters({
-      bases: 'user/bases',
-      coinMap: 'user/coins',
-      coinsInvert: 'user/coinsInvert',
       username: 'auth/username',
       accountId: 'auth/address',
-      baseCurrency: 'exchange/base',
-      quoteCurrency: 'exchange/quote',
-      // base_id: 'exchange/base_id',
-      // quote_id: 'exchange/quote_id',
+
       refreshRate: 'exchange/tradesRefreshRate',
       locale: 'i18n/locale',
       innerWidth: 'exchange/innerWidth'
@@ -409,24 +403,13 @@ export default {
           .then(() => {
             stop = true
             times = 0
-            this.$store.commit('exchange/SET_CONNECT_STATUS', {
-              orderConnect: true
-            })
           })
           .catch((e) => {
-            this.$store.commit('exchange/SET_CONNECT_STATUS', {
-              orderConnect: false
-            })
             times--
             this.$eventHandle(() =>
               this.fetchOrderHistory(cleanRows, showLoading)
             )
           })
-      }
-      if (times !== 0) {
-        this.$store.commit('exchange/SET_CONNECT_STATUS', {
-          orderConnect: false
-        })
       }
     },
     onScroll(event) {},
@@ -434,11 +417,11 @@ export default {
       const base =
         item && item.market
           ? this.coinName(item.market.base, this.coinMap)
-          : this.baseCurrency
+          : this.baseName
       const quote =
         item && item.market
           ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteCurrency
+          : this.quoteName
       const defaultDigits = this.isCustomPair(
         item.market.base,
         item.market.quote
@@ -457,11 +440,11 @@ export default {
       const base =
         item && item.market
           ? this.coinName(item.market.base, this.coinMap)
-          : this.baseCurrency
+          : this.baseName
       const quote =
         item && item.market
           ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteCurrency
+          : this.quoteName
       const defaultDigits = this.isCustomPair(
         item.market.base,
         item.market.quote
@@ -474,16 +457,15 @@ export default {
       const base =
         item && item.market
           ? this.coinName(item.market.base, this.coinMap)
-          : this.baseCurrency
+          : this.baseName
       const quote =
         item && item.market
           ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteCurrency
+          : this.quoteName
       return this.getPairConfig(base, quote, 'book', 'total', 3)
     },
     calcFilterByDate(date) {
       let start, end
-      let reset = true
       end = moment()
         .hour(23)
         .minute(59)
@@ -540,7 +522,6 @@ export default {
             .second(59)
             .utc()
             .format(this.dateXHRFormat)
-          reset = false
           break
       }
       // clone moment object
@@ -550,14 +531,7 @@ export default {
         lastid: null
       }
       // 更新 startDate endDate
-      if (reset) {
-        this.startDate = moment(moment.utc(start).toDate()).format(
-          this.datepickerFormat
-        )
-        this.endDate = moment(moment.utc(end).toDate()).format(
-          this.datepickerFormat
-        )
-      }
+
       return filter
     },
 
@@ -580,11 +554,7 @@ export default {
         //   filter
         // );
         // closed orders
-        const closedRows = await CybexDotClient.getOrders(
-          CybexDotClient.TradePairHash,
-          this.accountId,
-          false
-        )
+        const closedRows = await CybexDotClient.getOrders(this.accountId, false)
         this.isLoading = false
 
         this.rowsData = closedRows

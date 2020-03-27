@@ -98,12 +98,10 @@ export default {
   computed: {
     ...mapGetters({
       username: 'auth/username',
-      total: 'user/total',
+      address: 'auth/address',
+
       symbol: 'i18n/symbol',
-      locale: 'i18n/locale',
-      tab: 'user/assetTab',
-      defaultAsset: 'exchange/defaultAsset',
-      address: 'auth/address'
+      locale: 'i18n/locale'
     }),
     tabItems() {
       return this.tabs.map((tab) => tab.label)
@@ -115,21 +113,12 @@ export default {
       get() {
         return this.tab
       },
-      set(value) {
-        this.$store.commit('user/UPDATE_ASSET_TAB', {
-          username: this.username,
-          tab: value
-        })
-      }
+      set(value) {}
     }
   },
   watch: {},
 
-  async mounted() {
-    if (this.username) {
-      await this.$store.dispatch('user/loadAssetTab', this.username)
-    }
-  },
+  async mounted() {},
   head() {
     return {
       title: this.$t('title.portfolio')

@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import { isEmpty } from 'lodash'
 
 export default {
@@ -148,8 +148,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      username: 'auth/username',
-      assetConfig: 'user/assetConfigByName'
+      username: 'auth/username'
     }),
     itemDatas() {
       return this.history || []
@@ -241,10 +240,7 @@ export default {
     open(url) {
       window.open(url)
     },
-    async fetchExplorer() {},
-    ...mapActions({
-      loadAssetConfig: 'user/loadAssetConfig'
-    })
+    async fetchExplorer() {}
   }
 }
 </script>

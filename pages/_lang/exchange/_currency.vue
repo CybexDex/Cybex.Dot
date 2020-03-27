@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import CybexDotClient from '~/lib/CybexDotClient.js'
 
 export default {
@@ -131,9 +131,7 @@ export default {
   computed: {
     ...mapGetters({
       locale: 'i18n/locale',
-      tradesRefreshRate: 'exchange/tradesRefreshRate',
-      base_id: 'exchange/base_id',
-      quote_id: 'exchange/quote_id'
+      tradesRefreshRate: 'exchange/tradesRefreshRate'
     }),
     orderFilter() {
       const pair = this.hideOtherPair
@@ -144,16 +142,12 @@ export default {
   },
 
   async mounted() {
-    await CybexDotClient.init()
     await this.fetchData()
   },
   beforeDestroy() {
     clearInterval(this.intervalActivity)
   },
   methods: {
-    ...mapActions({
-      loadVersionFlag: 'user/loadVersionFlag'
-    }),
     setFormPrice(info) {
       const newData = {
         buyPrice: parseFloat(info.price).toFixed(this.digitsPrice),
@@ -196,9 +190,7 @@ export default {
     async loadTicker() {
       const func = async () => {
         // 24小时数据
-        const ticker = await CybexDotClient.getTicker(
-          CybexDotClient.TradePairHash
-        )
+        const ticker = await CybexDotClient.getTicker()
         this.$store.commit('exchange/SET_CURRENT_RTE_PRICE', {
           price: ticker.latest_matched_price / 10 ** 8,
           legalPrice: null

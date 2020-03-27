@@ -219,15 +219,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      bases: 'user/bases',
-      coinMap: 'user/coins',
-      coinsInvert: 'user/coinsInvert',
       username: 'auth/username',
       accountId: 'auth/address',
-      baseCurrency: 'exchange/base',
-      asset_is_custom: 'exchange/asset_is_custom',
-      quoteCurrency: 'exchange/quote',
-      quote_is_custom: 'exchange/quote_is_custom',
       refreshRate: 'exchange/tradesRefreshRate',
       innerWidth: 'exchange/innerWidth'
     }),
@@ -353,22 +346,11 @@ export default {
           .then(() => {
             times = 0
             stop = true
-            this.$store.commit('exchange/SET_CONNECT_STATUS', {
-              tradeConnect: true
-            })
           })
           .catch((e) => {
-            this.$store.commit('exchange/SET_CONNECT_STATUS', {
-              tradeConnect: false
-            })
             times--
             this.$eventHandle(() => this.fetchTrades(cleanRows, showLoading))
           })
-        if (times !== 0) {
-          this.$store.commit('exchange/SET_CONNECT_STATUS', {
-            tradeConnect: false
-          })
-        }
       }
     },
     delaySetLoading(time = 1000) {
@@ -381,11 +363,11 @@ export default {
       const base =
         item && item.market
           ? this.coinName(item.market.base, this.coinMap)
-          : this.baseCurrency
+          : this.baseName
       const quote =
         item && item.market
           ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteCurrency
+          : this.quoteName
       const defaultDigits = this.isCustomPair(
         item.market.base,
         item.market.quote
@@ -404,11 +386,11 @@ export default {
       const base =
         item && item.market
           ? this.coinName(item.market.base, this.coinMap)
-          : this.baseCurrency
+          : this.baseName
       const quote =
         item && item.market
           ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteCurrency
+          : this.quoteName
       const defaultDigits = this.isCustomPair(
         item.market.base,
         item.market.quote
@@ -445,11 +427,7 @@ export default {
         //   filter.quote_id,
         //   filter.white_flag)
 
-        let tradeRows = await CybexDotClient.getTrades(
-          CybexDotClient.TradePairHash,
-          20,
-          this.accountId
-        )
+        let tradeRows = await CybexDotClient.getTrades(20, this.accountId)
         this.isLoading = false
         tradeRows = tradeRows.map((v) => {
           return {

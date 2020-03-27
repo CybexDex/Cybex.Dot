@@ -187,12 +187,8 @@ export default {
   computed: {
     ...mapGetters({
       username: 'auth/username',
-      coinMap: 'user/coins',
-      coinsInvert: 'user/coinsInvert',
       islocked: 'auth/islocked',
-      showUnlock: 'showUnlock',
-      memokey: 'user/memokey',
-      transferTo: 'user/transferTo'
+      showUnlock: 'showUnlock'
     }),
     canTransfer() {
       return (
@@ -220,23 +216,13 @@ export default {
       get() {
         return this.transferTo.name
       },
-      set(value) {
-        this.$store.commit('user/SET_TRANSFER_TO', {
-          name: value,
-          id: ''
-        })
-      }
+      set(value) {}
     },
     accountId: {
       get() {
         return this.transferTo.id
       },
-      set(value) {
-        this.$store.commit('user/SET_TRANSFER_TO', {
-          name: this.transferTo.name,
-          id: value
-        })
-      }
+      set(value) {}
     },
     coinname() {
       return this.$options.filters.shorten(this.cointype)
@@ -249,7 +235,6 @@ export default {
       }
       this.account = ''
       this.resetFee()
-      this.$store.commit('user/CLEAR_MEMO_KEY')
       this.fetchBalance(this.cointype)
       if (!this.islocked) {
       }

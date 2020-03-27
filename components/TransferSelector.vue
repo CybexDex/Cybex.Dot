@@ -208,7 +208,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import { filter, map, values, assign } from 'lodash'
 import utils from '~/components/mixins/utils'
 
@@ -242,23 +242,10 @@ export default {
 
   computed: {
     ...mapGetters({
-      prefix: 'exchange/prefix',
-      coinMap: 'user/coins',
-      coinMapInvert: 'user/coinsInvert',
-      withdraw: 'user/withdraw',
-      deposit: 'user/deposit',
       locale: 'i18n/locale',
       shortcut: 'i18n/shortcut',
-      icons: 'user/icons',
-      islocked: 'auth/islocked',
-      defaultAsset: 'exchange/defaultAsset',
-      cointype: 'dwCoinType',
-      userAssets: 'user/userAssets',
-      assets: 'user/assets',
-      game_prefix: 'exchange/game_prefix',
       username: 'auth/username',
-      assetConfig: 'user/assetConfigBySymbol',
-      customAssetsMap: 'user/customAssets'
+      islocked: 'auth/islocked'
     }),
     transfer() {
       return map(
@@ -351,9 +338,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions({
-      load_icons: 'user/load_icons'
-    }),
     selectedCoin(idx) {
       return (
         this.coins.findIndex((i) => this.prefix + i === this.cointype) === idx

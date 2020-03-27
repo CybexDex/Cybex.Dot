@@ -8,7 +8,7 @@
         <asset-pairs
           :max-width="''"
           :color-opacity="0.4"
-          :asset-id="baseCurrency"
+          :asset-name="baseName"
         />)
       </span>
       <span class="amount">
@@ -17,7 +17,7 @@
         <asset-pairs
           :max-width="''"
           :color-opacity="0.4"
-          :asset-id="quoteCurrency"
+          :asset-name="quoteName"
         />)
       </span>
       <span class="total">
@@ -26,7 +26,7 @@
         <asset-pairs
           :max-width="''"
           :color-opacity="0.4"
-          :asset-id="baseCurrency"
+          :asset-name="baseName"
         />)
       </span>
     </div>
@@ -129,20 +129,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      baseCurrency: 'exchange/base',
-      quoteCurrency: 'exchange/quote',
-      // base_id: 'exchange/base_id',
-      // base_digits: 'exchange/base_digits',
-
-      // quote_id: 'exchange/quote_id',
-      // quote_digits: 'exchange/quote_digits',
       priceDigits: 'exchange/priceDigits',
       legalSymbol: 'i18n/symbol',
       locale: 'i18n/locale',
-      // prefix: 'exchange/prefix',
       currentOrderPrice: 'exchange/currentRTEPrice',
       currentOrderLegalPrice: 'exchange/currentOrderLegalPrice',
-      netstatus: 'exchange/netstatus',
       refreshRate: 'exchange/tradesRefreshRate'
     }),
     rowsFullHeight() {
@@ -186,9 +177,7 @@ export default {
       get() {
         return this.priceDigits
       },
-      set(v) {
-        this.$store.commit('exchange/SET_PRICE_DIGITS', v)
-      }
+      set(v) {}
     }
   },
   watch: {
@@ -373,12 +362,8 @@ export default {
     initRTEData() {
       this.removeInterval()
       this.$eventHandle(this.getOrderBookByDigits)
-        .then(() => {
-          this.$store.commit('exchange/SET_MDP_CONNECT_STATUS', true)
-        })
-        .catch((e) => {
-          this.$store.commit('exchange/SET_MDP_CONNECT_STATUS', false)
-        })
+        .then(() => {})
+        .catch((e) => {})
     },
     setScrollTop() {
       // console.log('this.order', this.order);
@@ -436,9 +421,7 @@ export default {
     // 请求RTE数据
     async getOrderBookByDigits() {
       const func = async () => {
-        const orderBook = await CybexDotClient.getOrderBook(
-          CybexDotClient.TradePairHash
-        )
+        const orderBook = await CybexDotClient.getOrderBook()
 
         this.orderSellRows = orderBook[0].map((o) => {
           return {

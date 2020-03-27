@@ -253,7 +253,7 @@
 
 <script>
 import { filter, orderBy, pickBy, keys } from 'lodash'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import utils from '~/components/mixins/utils'
 import config from '~/lib/config/config.js'
 
@@ -323,18 +323,10 @@ export default {
 
   computed: {
     ...mapGetters({
-      prefix: 'exchange/prefix',
       username: 'auth/username',
-      coinMap: 'user/coins',
-      icons: 'user/icons',
-      bases: 'user/bases',
       locale: 'i18n/locale',
       localeShort: 'i18n/shortcut',
-      symbol: 'i18n/symbol',
-      assetList: 'user/assets',
-      game_prefix: 'exchange/game_prefix',
-      topAssets: 'user/topAssets',
-      assetConfig: 'user/assetConfigById'
+      symbol: 'i18n/symbol'
     }),
     iconMap() {
       return this.icons || []
@@ -382,10 +374,6 @@ export default {
     } catch (e) {}
   },
   methods: {
-    ...mapActions({
-      setTotal: 'user/setTotal',
-      loadAssets: 'user/loadAssets'
-    }),
     onSortClick(data) {
       const header = data.header
       const sort = this.sortMap[header.value] === 'desc' ? 'asc' : 'desc'

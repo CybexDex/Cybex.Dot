@@ -15,7 +15,6 @@ export async function getHistoryData(
   const bars = []
 
   const barsData = await CybexDotClient.getMarket(
-    CybexDotClient.TradePairHash,
     bucketSeconds,
     requestEndDate,
     limit

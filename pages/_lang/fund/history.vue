@@ -67,7 +67,6 @@ export default {
   computed: {
     ...mapGetters({
       islocked: 'auth/islocked',
-      coinMapInvert: 'user/coinsInvert',
       username: 'auth/username'
     })
   },

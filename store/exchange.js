@@ -1,32 +1,29 @@
+import CybexDotClient from '~/lib/CybexDotClient'
+
 export const state = () => ({
   innerWidth: null,
   baseCurrency: null,
   quoteCurrency: null,
+  pair: null,
   currentRTEPrice: null, // 当前成交价格
   currentOrderLegalPrice: null,
-  baseId: '1.3.0',
-  quoteId: '1.3.27',
-  priceDigits: 8,
-  netstatus: {
-    market: false,
-    tradeConnect: true,
-    orderConnect: true,
-    trade: false,
-    order: false,
-    history: false
-  },
+  priceDigits: 8, // 深度价格默认精度
+  pairs: null,
+  assets: null,
   tradesRefreshRate: 6000 // 频率 ms
 })
 
 export const getters = {
-  base: (state) => state.baseCurrency,
-  quote: (state) => state.quoteCurrency,
-  base_id: (state) => state.baseId,
-  quote_id: (state) => state.quoteId,
+  baseName: (state) => state.baseCurrency.name, // base name
+  quoteName: (state) => state.quoteCurrency.name, // quote name
+  baseHash: (state) => state.baseCurrency.id,
+  quoteHash: (state) => state.quoteCurrency.id,
+  pairHash: (state) => state.pair.id,
+  pairs: (state) => state.pairs,
+  assets: (state) => state.assets,
   innerWidth: (state) => state.innerWidth,
   currentRTEPrice: (state) => state.currentRTEPrice,
   currentOrderLegalPrice: (state) => state.currentOrderLegalPrice,
-  netstatus: (state) => state.netstatus,
   tradesRefreshRate: (state) => state.tradesRefreshRate,
   priceDigits: (state) => state.priceDigits
 }
@@ -36,16 +33,11 @@ export const mutations = {
     state.innerWidth = val
   },
   SET_CURRENCY(state, currency) {
+    CybexDotClient.setPair(currency.base.id, currency.quote.id, currency.id)
+
     state.baseCurrency = currency.base
     state.quoteCurrency = currency.quote
-  },
-  SET_CONNECT_STATUS(state, connect) {
-    const newConnect = Object.assign(state.netstatus, connect)
-    newConnect.history = newConnect.tradeConnect && newConnect.orderConnect
-    state.netstatus = newConnect
-  },
-  SET_MDP_CONNECT_STATUS(state, status) {
-    state.netstatus = Object.assign(state.netstatus, { market: status })
+    state.pair = currency
   },
   SET_PRICE_DIGITS(state, digits) {
     state.priceDigits = digits
@@ -53,6 +45,12 @@ export const mutations = {
   SET_CURRENT_RTE_PRICE(state, { price, legalPrice }) {
     state.currentRTEPrice = price
     state.currentRTELegalPrice = legalPrice
+  },
+  SET_PAIRS(state, pairs) {
+    state.pairs = pairs
+  },
+  SET_ASSETS(state, assets) {
+    state.assets = assets
   }
 }
 

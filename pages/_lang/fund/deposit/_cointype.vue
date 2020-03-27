@@ -87,9 +87,7 @@ export default {
   computed: {
     ...mapGetters({
       username: 'auth/username',
-      coinsInvert: 'user/coinsInvert',
       localeShort: 'i18n/shortcut',
-      assetConfig: 'user/assetConfigBySymbol',
       islocked: 'auth/islocked'
     }),
     needShowMemo() {

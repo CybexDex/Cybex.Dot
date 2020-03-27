@@ -58,13 +58,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      baseCurrency: 'exchange/base',
-      quoteCurrency: 'exchange/quote',
-      // base_id: 'exchange/base_id',
-      base_digits: 'exchange/base_digits',
-      // quote_id: 'exchange/quote_id',
-      quote_is_custom: 'exchange/quote_is_custom',
-      quote_digits: 'exchange/quote_digits',
       tradesRefreshRate: 'exchange/tradesRefreshRate'
     }),
     digitsPrice() {
@@ -119,10 +112,7 @@ export default {
 
     async fetchSubstrateMarketTrades() {
       const func = async () => {
-        const trades = await CybexDotClient.getTrades(
-          CybexDotClient.TradePairHash,
-          50
-        )
+        const trades = await CybexDotClient.getTrades(50)
 
         this.trades = trades.map((t) => {
           return {

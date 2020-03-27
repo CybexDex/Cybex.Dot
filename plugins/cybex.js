@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { indexOf } from 'lodash'
+import CybexDotClient from '~/lib/CybexDotClient.js'
 
 /**
  * 分析错误具体构成
@@ -85,7 +86,12 @@ export function handleError(error, app, funcName, route, inSilence) {
   }
 }
 
-export default ({ store, app, route }) => {
+export default async ({ store, app, route }) => {
+  const pairs = await CybexDotClient.getPairs()
+  store.commit('exchange/SET_PAIRS', pairs)
+  const tokens = await CybexDotClient.getTokens()
+  store.commit('exchange/SET_ASSETS', tokens)
+
   /**
    * 事件处理封装函数
    * @param {*} callback Function 执行方法

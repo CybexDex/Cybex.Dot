@@ -22,8 +22,8 @@
           <asset-pairs
             :max-width="limitAssetSize ? '180px' : null"
             :max-quote-width="limitAssetSize ? '70%' : null"
-            :base-id="baseCurrency"
-            :quote-id="quoteCurrency"
+            :base-name="baseName"
+            :quote-name="quoteName"
           />
         </span>
         <v-icon class="arrow-icon ml-2" style="display: inline">{{
@@ -332,17 +332,9 @@ export default {
   computed: {
     ...mapGetters({
       locale: 'i18n/locale',
-      bases: 'user/bases',
-      coinMapInvert: 'user/coinsInvert',
-      coinMap: 'user/coins',
+      username: 'auth/username',
       tradesRefreshRate: 'exchange/tradesRefreshRate',
-      baseCurrency: 'exchange/base',
-      quoteCurrency: 'exchange/quote',
-      base_id: 'exchange/base_id',
-      quote_id: 'exchange/quote_id',
-      quote_is_custom: 'exchange/quote_is_custom',
-      priceDigits: 'exchange/priceDigits',
-      username: 'auth/username'
+      priceDigits: 'exchange/priceDigits'
     }),
 
     limitAssetSize() {

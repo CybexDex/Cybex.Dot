@@ -63,7 +63,7 @@
         </div>
         <div class="price volume">
           {{ activityData.base_volume }}
-          <asset-pairs :max-width="'10vw'" :asset-id="baseCurrency" />
+          <asset-pairs :max-width="'10vw'" :asset-name="baseName" />
         </div>
       </div>
     </v-flex>
@@ -98,15 +98,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      baseCurrency: 'exchange/base',
-      // quoteCurrency: 'exchange/quote',
-      // base_id: 'exchange/base_id',
-      // quote_id: 'exchange/quote_id',
-      // base_digits: 'exchange/base_digits',
-      // quote_digits: 'exchange/quote_digits',
       currentOrderPrice: 'exchange/currentRTEPrice'
-      // currentOrderLegalPrice: 'exchange/currentRTELegalPrice',
-      // legalSymbol: 'i18n/symbol'
     })
   },
   watch: {

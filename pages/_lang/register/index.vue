@@ -266,14 +266,12 @@
 <script>
 import utils from '~/components/mixins/utils'
 import userValid from '~/components/mixins/user-valid.js'
-import { LOGIN_MODE_LOCAL } from '~/lib/user'
 
 export default {
   components: {},
   mixins: [utils, userValid],
   data() {
     return {
-      registerMode: LOGIN_MODE_LOCAL,
       message: '',
       isAccountValid: true,
       showPassword: false,

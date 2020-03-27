@@ -23,8 +23,6 @@
 </template>
 
 <script>
-// import { mapGetters, mapActions } from "vuex";
-
 export default {
   components: {
     ExchangeOpenOrder: () =>
