@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import { indexOf } from 'lodash'
 import CybexDotClient from '~/lib/CybexDotClient.js'
+// import defaultPairs from '~/lib/pairs.js'
+// import defaultTokens from '~/lib/tokens.js'
 
 /**
  * 分析错误具体构成
@@ -92,6 +94,10 @@ export default async ({ store, app, route }) => {
   const tokens = await CybexDotClient.getTokens()
   store.commit('exchange/SET_ASSETS', tokens)
 
+  // TEST
+  // store.commit('exchange/SET_PAIRS', defaultPairs)
+  // store.commit('exchange/SET_ASSETS', defaultTokens)
+
   /**
    * 事件处理封装函数
    * @param {*} callback Function 执行方法
@@ -136,7 +142,11 @@ export default async ({ store, app, route }) => {
   }
 
   Vue.prototype.$message = ({ type, message, delay }) => {
-    store.commit('SHOW_MSG', { type, message, delay })
+    store.commit('SHOW_MSG', {
+      type,
+      message,
+      delay
+    })
   }
   Vue.prototype.$toggleLock = (showUnlocked) => {
     store.commit('TOGGLE_UNLOCK', showUnlocked)

@@ -21,10 +21,12 @@
                   price: parseFloat(trade.price).toFixed(digitsPrice)
                 })
               "
-              >{{ trade.price | roundDigits(digitsPrice) }}</span
+              >{{ trade.price | roundDigits(digitsPrice) | shortenPrice }}</span
             >
             <span class="amount">{{
-              trade.quote | roundDigits(digitsAmount)
+              trade.quote
+                | roundDigits(digitsAmount)
+                | avoidMinAmount(digitsAmount)
             }}</span>
             <span class="time c-white-30">{{
               trade.time | localDate('HH:mm:ss')
@@ -40,6 +42,7 @@
 import { mapGetters } from 'vuex'
 import utils from '~/components/mixins/utils'
 import CybexDotClient from '~/lib/CybexDotClient.js'
+import config from '~/lib/config/config'
 
 export default {
   components: {
@@ -61,12 +64,10 @@ export default {
       tradesRefreshRate: 'exchange/tradesRefreshRate'
     }),
     digitsPrice() {
-      const defaultDigits = 8
-      return defaultDigits
+      return this.pair.book.last_price || 5
     },
     digitsAmount() {
-      const defaultDigits = 0
-      return defaultDigits
+      return this.pair.book.amount || 5
     }
   },
   watch: {
@@ -117,8 +118,10 @@ export default {
         this.trades = trades.map((t) => {
           return {
             tradetype: t.otype === 0 ? 'buy' : 'sell',
-            price: t.price / 10 ** 8,
-            quote: t.quote_amount,
+            price:
+              (t.price * 10 ** this.priceMatchedPrecision) /
+              config.pricePrecision,
+            quote: t.quote_amount / 10 ** this.quotePrecision,
             time: t.datetime
           }
         })

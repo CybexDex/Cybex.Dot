@@ -1,11 +1,15 @@
 import Vue from 'vue'
 import Vue2Filters from 'vue2-filters'
 import moment from 'moment'
-import { round, ceil, floor } from 'lodash'
+import { round, ceil, floor, isNumber } from 'lodash'
+import BigNumber from 'bignumber.js'
 
 Vue.use(Vue2Filters)
 
 const filters = {
+  realAmount(val, precision) {
+    return val / 10 ** precision
+  },
   date: (d, f) => {
     const local = moment.utc(d).toDate()
 
@@ -24,7 +28,56 @@ const filters = {
     }
     return oldP.substr(0, maxPrecision)
   },
-
+  shortenVolume(value, precision) {
+    value = parseFloat(value)
+    precision = precision || 2
+    let result = 0
+    if (isNumber(value)) {
+      if (value > 100 * 10000) {
+        const num = parseFloat(value / 100 / 10000)
+        precision = precision > 2 ? 2 : precision
+        result = `${[
+          num
+            .toLocaleString()
+            .split('.')
+            .shift(),
+          num
+            .toFixed(precision)
+            .split('.')
+            .pop()
+        ].join('.')}m`
+      } else if (value > 1000) {
+        const num = parseFloat(value / 1000)
+        precision = precision > 4 ? 4 : precision
+        result = `${[
+          num
+            .toLocaleString()
+            .split('.')
+            .shift(),
+          num
+            .toFixed(precision)
+            .split('.')
+            .pop()
+        ].join('.')}k`
+      } else {
+        result = [
+          value
+            .toLocaleString()
+            .split('.')
+            .shift(),
+          value
+            .toFixed(precision)
+            .split('.')
+            .pop()
+        ].join('.')
+      }
+    }
+    return result
+  },
+  priceChange(value) {
+    value = parseFloat(value)
+    return value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2)
+  },
   localDate: (d, f) => {
     const local = moment.utc(d).local()
 
@@ -101,6 +154,20 @@ const filters = {
     if (typeof emptyVal !== 'undefined' && val === emptyVal)
       return typeof emptySymbol !== 'undefined' ? emptySymbol : '-'
     else return ceil(val, digit).toFixed(digit)
+  },
+  /**
+   * 数值小于最小精度时的显示
+   * 如精度为1, 值为0.0001, 显示为 < 1
+   * @param {*} val
+   * @param {*} digits
+   */
+  avoidMinAmount(val, digits) {
+    const value = new BigNumber(val)
+    const minVal = new BigNumber(10).exponentiatedBy(0 - parseInt(digits))
+    if (value.isLessThan(minVal)) {
+      return '< ' + minVal.toString()
+    }
+    return val
   }
 }
 

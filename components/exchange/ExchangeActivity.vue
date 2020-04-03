@@ -62,8 +62,8 @@
           {{ $t('exchange.content.volume24h') }}:
         </div>
         <div class="price volume">
-          {{ activityData.base_volume }}
-          <asset-pairs :max-width="'10vw'" :asset-name="baseName" />
+          {{ activityData.quote_volume | roundDigits(digits24hVolume) }}
+          <asset-pairs :max-width="'10vw'" :asset-name="quoteName" />
         </div>
       </div>
     </v-flex>
@@ -91,15 +91,22 @@ export default {
   data() {
     return {
       showMarket: false,
-      currentIsUp: null,
-      digitsLastPrice: 8,
-      digits24hChange: 8
+      currentIsUp: null
     }
   },
   computed: {
     ...mapGetters({
       currentOrderPrice: 'exchange/currentRTEPrice'
-    })
+    }),
+    digitsLastPrice() {
+      return this.pair.info.last_price || 5
+    },
+    digits24hChange() {
+      return this.pair.info.change || 5
+    },
+    digits24hVolume() {
+      return this.pair.info.volume || 5
+    }
   },
   watch: {
     currentOrderPrice(newVal, oldVal) {
@@ -276,6 +283,7 @@ export default {
 
   .current-row {
     background-color: rgba(map-get($main, white), 0.04) !important;
+    border-radius: 4px;
   }
 
   .v-table {

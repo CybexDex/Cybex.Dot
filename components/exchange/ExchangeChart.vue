@@ -282,7 +282,7 @@ export default {
     initKlineData() {
       const cybexDatafeed = new Datafeed({
         resolution: this.resolution,
-        pricescale: 8
+        pricescale: this.pair.info.last_price || 5
       })
       return cybexDatafeed
     }

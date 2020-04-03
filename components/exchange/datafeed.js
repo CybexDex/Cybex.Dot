@@ -1,6 +1,7 @@
 import moment from 'moment-timezone'
 import { invert, values } from 'lodash'
 import CybexDotClient from '~/lib/CybexDotClient.js'
+import config from '~/lib/config/config.js'
 
 export function convertResolutionByValue(value, source) {
   const search = invert(source)
@@ -19,18 +20,41 @@ export async function getHistoryData(
     requestEndDate,
     limit
   )
+
   barsData.forEach((data) => {
     const time = moment.utc(data.time).valueOf()
 
     bars.push({
       time,
-      close: data.close / 10 ** 8,
-      open: data.open / 10 ** 8,
-      high: data.high / 10 ** 8,
-      low: data.low / 10 ** 8,
-      volume: parseFloat(data.quote_amount)
+      close:
+        (data.close *
+          10 **
+            (CybexDotClient.info.quotePrecision -
+              CybexDotClient.info.basePrecision)) /
+        config.pricePrecision,
+      open:
+        (data.open *
+          10 **
+            (CybexDotClient.info.quotePrecision -
+              CybexDotClient.info.basePrecision)) /
+        config.pricePrecision,
+      high:
+        (data.high *
+          10 **
+            (CybexDotClient.info.quotePrecision -
+              CybexDotClient.info.basePrecision)) /
+        config.pricePrecision,
+      low:
+        (data.low *
+          10 **
+            (CybexDotClient.info.quotePrecision -
+              CybexDotClient.info.basePrecision)) /
+        config.pricePrecision,
+      volume:
+        parseFloat(data.quote_amount) / 10 ** CybexDotClient.info.quotePrecision
     })
   })
+
   return bars
 }
 

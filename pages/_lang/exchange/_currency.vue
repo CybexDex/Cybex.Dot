@@ -67,7 +67,7 @@
             <ExchangeForm
               is-buy
               :balance-digits="balanceDigits"
-              :form-data.sync="formData"
+              :form-data="formData"
               @create-trade-success="createTradeSuccess"
             />
           </client-only>
@@ -76,7 +76,7 @@
           <client-only>
             <ExchangeForm
               :balance-digits="balanceDigits"
-              :form-data.sync="formData"
+              :form-data="formData"
               @create-trade-success="createTradeSuccess"
             />
           </client-only>
@@ -90,7 +90,8 @@
 <script>
 import { mapGetters } from 'vuex'
 import CybexDotClient from '~/lib/CybexDotClient.js'
-
+import config from '~/lib/config/config.js'
+import utils from '~/components/mixins/utils'
 export default {
   components: {
     Activity: () => import('~/components/exchange/ExchangeActivity.vue'),
@@ -107,6 +108,8 @@ export default {
       import('~/components/exchange/ExchangeHistoryTrade.vue')
     // VersionDialog: () => import('~/components/VersionDialog.vue')
   },
+  mixins: [utils],
+
   data() {
     return {
       intervalActivity: null,
@@ -115,11 +118,7 @@ export default {
       createTrade: false,
       openOrderRowLen: 0,
       trades: [],
-      balanceDigits: {
-        base: 0,
-        quote: 0
-      },
-      digitsPrice: 8,
+
       formData: {
         buyPrice: null,
         sellPrice: null,
@@ -133,11 +132,17 @@ export default {
       locale: 'i18n/locale',
       tradesRefreshRate: 'exchange/tradesRefreshRate'
     }),
+    balanceDigits() {
+      return { base: this.basePrecision, quote: this.quotePrecision }
+    },
     orderFilter() {
       const pair = this.hideOtherPair
         ? { base_id: this.base_id, quote_id: this.quote_id }
         : { base_id: null, quote_id: null }
       return Object.assign({}, pair, { refresh: this.createTrade })
+    },
+    digitsPrice() {
+      return this.pair.book.last_price || 2
     }
   },
 
@@ -190,16 +195,26 @@ export default {
     async loadTicker() {
       const func = async () => {
         // 24小时数据
-        const ticker = await CybexDotClient.getTicker()
+        const ticker = await CybexDotClient.getTicker(
+          CybexDotClient.info.tradePairHash
+        )
         this.$store.commit('exchange/SET_CURRENT_RTE_PRICE', {
-          price: ticker.latest_matched_price / 10 ** 8,
+          price:
+            (ticker.latest_matched_price * 10 ** this.priceMatchedPrecision) /
+            config.pricePrecision,
           legalPrice: null
         })
         this.activityData = {
-          latest: ticker.latest_matched_price / 10 ** 8,
-          low: ticker.one_day_lowest_price / 10 ** 8,
-          high: ticker.one_day_highest_price / 10 ** 8,
-          base_volume: ticker.one_day_trade_volume
+          latest:
+            (ticker.latest_matched_price * 10 ** this.priceMatchedPrecision) /
+            config.pricePrecision,
+          low:
+            (ticker.one_day_lowest_price * 10 ** this.priceMatchedPrecision) /
+            config.pricePrecision,
+          high:
+            (ticker.one_day_highest_price * 10 ** this.priceMatchedPrecision) /
+            config.pricePrecision,
+          quote_volume: ticker.one_day_trade_volume / 10 ** this.quotePrecision
         }
       }
       await func()
@@ -207,8 +222,8 @@ export default {
       // form price只需要初始化第一次 其余由用户自己交互
       const price = this.activityData.latest
       const newData = {
-        buyPrice: price,
-        sellPrice: price,
+        buyPrice: parseFloat(price).toFixed(this.digitsPrice),
+        sellPrice: parseFloat(price).toFixed(this.digitsPrice),
         autoSet: true
       }
       this.formData = Object.assign({}, this.formData, newData)

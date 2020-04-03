@@ -63,9 +63,9 @@
                 :color-opacity="
                   item.status.toLowerCase() == 'canceled' ? 0.5 : 1
                 "
-                :quote-id="item.market.quote"
+                :quote-name="item.market.quote"
                 :spacer="false"
-                :base-id="item.market.base"
+                :base-name="item.market.base"
               />
             </td>
             <td
@@ -84,15 +84,17 @@
                   | shortenPrice
               }}
             </td> -->
-            <td class="text-xs-left">{{ item.price }}</td>
             <td class="text-xs-left">
-              {{ item.filled | roundDigits(item.asset_digit_amount) }}
+              {{ item.price | floorDigits(digitsPrice) | shortenPrice }}
             </td>
             <td class="text-xs-left">
-              {{ item.amount | roundDigits(item.asset_digit_amount) }}
+              {{ item.filled | roundDigits(digitsAmount) }}
+            </td>
+            <td class="text-xs-left">
+              {{ item.amount | roundDigits(digitsAmount) }}
             </td>
             <td class="text-xs-right">
-              {{ item.total | roundDigits(item.asset_digit_base) }}
+              {{ item.total | roundDigits(digitsTotal) }}
             </td>
             <td class="text-xs-right">
               {{
@@ -121,7 +123,7 @@ import moment from 'moment'
 
 import utils from '~/components/mixins/utils'
 import CybexDotClient from '~/lib/CybexDotClient.js'
-
+import config from '~/lib/config/config'
 export default {
   components: {
     // BaseQuoteSelector: () => import('~/components/BaseQuoteSelector.vue'),
@@ -280,6 +282,15 @@ export default {
     },
     startdateDisplayFormatted() {
       return this.formatDate(this.startDate, this.dateDisplayFormat)
+    },
+    digitsPrice() {
+      return this.pair.book.last_price || 5
+    },
+    digitsAmount() {
+      return this.pair.book.amount || 5
+    },
+    digitsTotal() {
+      return this.pair.book.total || 5
     }
   },
   watch: {
@@ -413,57 +424,7 @@ export default {
       }
     },
     onScroll(event) {},
-    digitsPrice(item) {
-      const base =
-        item && item.market
-          ? this.coinName(item.market.base, this.coinMap)
-          : this.baseName
-      const quote =
-        item && item.market
-          ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteName
-      const defaultDigits = this.isCustomPair(
-        item.market.base,
-        item.market.quote
-      )
-        ? 8
-        : 5
-      return this.getPairConfig(
-        base,
-        quote,
-        'book',
-        'last_price',
-        defaultDigits
-      )
-    },
-    digitsAmount(item) {
-      const base =
-        item && item.market
-          ? this.coinName(item.market.base, this.coinMap)
-          : this.baseName
-      const quote =
-        item && item.market
-          ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteName
-      const defaultDigits = this.isCustomPair(
-        item.market.base,
-        item.market.quote
-      )
-        ? item.asset_digit_quote
-        : 5
-      return this.getPairConfig(base, quote, 'book', 'amount', defaultDigits)
-    },
-    digitsTotal(item) {
-      const base =
-        item && item.market
-          ? this.coinName(item.market.base, this.coinMap)
-          : this.baseName
-      const quote =
-        item && item.market
-          ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteName
-      return this.getPairConfig(base, quote, 'book', 'total', 3)
-    },
+
     calcFilterByDate(date) {
       let start, end
       end = moment()
@@ -563,25 +524,29 @@ export default {
                 id: v.hash,
                 time: v.datetime,
                 tradetype: v.otype === 0 ? 'buy' : 'sell',
-                price: v.price / 10 ** 8,
-                amount: v.otype === 0 ? v.buy_amount : v.sell_amount,
+                price:
+                  (v.price * 10 ** this.priceMatchedPrecision) /
+                  config.pricePrecision,
+                amount:
+                  v.otype === 0
+                    ? v.buy_amount / 10 ** this.quotePrecision
+                    : v.sell_amount / 10 ** this.quotePrecision,
                 market: {
-                  base:
-                    v.base === CybexDotClient.baseTokenHash ? '1.3.27' : v.base,
-                  quote:
-                    v.quote === CybexDotClient.quoteTokenHash
-                      ? '1.3.0'
-                      : v.quote
+                  base: this.baseName,
+                  quote: this.quoteName
                 },
-                base_id:
-                  v.base === CybexDotClient.baseTokenHash ? '1.3.27' : v.base,
-                quote_id:
-                  v.quote === CybexDotClient.quoteTokenHash ? '1.3.0' : v.quote,
+                base_id: this.baseName,
+                quote_id: this.quoteName,
                 filled:
                   v.otype === 0
-                    ? v.buy_amount - v.remained_buy_amount
-                    : v.sell_amount - v.remained_sell_amount,
-                total: v.otype === 0 ? v.sell_amount : v.buy_amount,
+                    ? (v.buy_amount - v.remained_buy_amount) /
+                      10 ** this.quotePrecision
+                    : (v.sell_amount - v.remained_sell_amount) /
+                      10 ** this.quotePrecision,
+                total:
+                  v.otype === 0
+                    ? v.sell_amount / 10 ** this.basePrecision
+                    : v.buy_amount / 10 ** this.basePrecision,
                 average: null,
                 status: v.status === 2 ? 'Filled' : 'Canceled'
               }

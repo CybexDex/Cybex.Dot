@@ -2,15 +2,8 @@
 import { mapGetters } from 'vuex'
 import BigNumber from 'bignumber.js'
 import moment from 'moment'
-import CybexDotClient from '~/lib/CybexDotClient.js'
 
 export default {
-  async mounted() {
-    await CybexDotClient.init()
-    CybexDotClient.setSignAccount(this.signer)
-
-    CybexDotClient.setPair(this.baseHash, this.quoteHash, this.pairHash)
-  },
   data() {
     return {
       dateDisplayFormat: 'YYYY/MM/DD', // 显示用moment日期格式
@@ -22,15 +15,21 @@ export default {
       signer: 'auth/signer',
 
       pairs: 'exchange/pairs',
+      pair: 'exchange/pair',
       assets: 'exchange/assets',
       baseName: 'exchange/baseName',
       quoteName: 'exchange/quoteName',
       baseHash: 'exchange/baseHash',
       quoteHash: 'exchange/quoteHash',
-      pairHash: 'exchange/pairHash'
+      pairHash: 'exchange/pairHash',
+      basePrecision: 'exchange/basePrecision',
+      quotePrecision: 'exchange/quotePrecision'
     }),
     cookieName() {
       return this.$cookies.get('auth-username')
+    },
+    priceMatchedPrecision() {
+      return this.quotePrecision - this.basePrecision
     }
   },
   methods: {

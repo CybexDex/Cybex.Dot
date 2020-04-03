@@ -47,9 +47,9 @@
               v-model="price"
               :class="{ 'has-error': priceError != '' }"
               type="number"
-              :placeholder="1"
+              :placeholder="getStep('price_step')"
               class="d-flex exchange-form-input theme--cybex-dark"
-              :step="1"
+              :step="getStep('price_step')"
               @keypress="validUserKeypress($event)"
               @input="validUserInput('price', $event)"
             />
@@ -84,9 +84,9 @@
               v-model="amount"
               :class="{ 'has-error': amountError != '' }"
               type="number"
-              :placeholder="1"
+              :placeholder="getStep('amount_step')"
               class="d-flex exchange-form-input"
-              :step="1"
+              :step="getStep('amount_step')"
               @keypress="validUserKeypress($event)"
               @input="validUserInput('amount', $event)"
             />
@@ -125,8 +125,8 @@
               v-model="total"
               :class="{ 'has-error': totalError != '' }"
               type="number"
-              :placeholder="1"
-              :step="1"
+              :placeholder="getStep('total_step')"
+              :step="getStep('total_step')"
               class="d-flex exchange-form-input"
               @keypress="validUserKeypress($event)"
               @input="validUserInput('total', $event)"
@@ -350,13 +350,14 @@ export default {
 
     confirmPrice() {
       const total = new BigNumber(this.total)
-      const t = this.isBuy
+      let t = this.isBuy
         ? total
             .dividedBy(this.amount)
             .toFixed(this.priceDigits, BigNumber.ROUND_FLOOR)
         : total
             .dividedBy(this.amount)
             .toFixed(this.priceDigits, BigNumber.ROUND_CEIL)
+      t = this.$options.filters.shortenPrice(t)
       return t
     },
     priceError() {
@@ -372,7 +373,7 @@ export default {
     },
     amountError() {
       // 检查最小下单数量Amount和金额Total
-      const minAmount = 1
+      const minAmount = this.getMinVal('min_trade_amount')
       // if (!this.amount && this.formIsSubmitted) {
       //   return "Amount is required";
       // }
@@ -384,13 +385,11 @@ export default {
       if (this.$refs.amountInput && this.$refs.amountInput.validity.badInput) {
         return this.$t('exchange.order-form.valid.number')
       }
-      if (this.amount && !Number.isInteger(parseFloat(this.amount))) {
-        return this.$t('exchange.order-form.valid.integer')
-      }
+
       return ''
     },
     totalError() {
-      const minTotal = 1
+      const minTotal = this.getMinVal('min_order_value')
       if (minTotal && parseFloat(this.total) < parseFloat(minTotal)) {
         return this.$t('exchange.order-form.valid.total', { value: minTotal })
       }
@@ -398,19 +397,16 @@ export default {
         return this.$t('exchange.order-form.valid.number')
       }
 
-      if (this.total && !Number.isInteger(parseFloat(this.total))) {
-        return this.$t('exchange.order-form.valid.integer')
-      }
       return ''
     },
     priceDigits() {
-      return 8
+      return this.pair.book.last_price || 2
     },
     totalDigits() {
-      return 2
+      return this.pair.book.total || 2
     },
     amountDigits() {
-      return 2
+      return this.pair.book.amount || 2
     },
     couldCreateTrade() {
       if (
@@ -508,6 +504,7 @@ export default {
       if (this.isBuy) {
         // set price change
         price = newV.buyPrice
+
         if (parseFloat(price) === 0 && newV.autoSet) {
           this.legalPrice = null
         } else {
@@ -553,6 +550,29 @@ export default {
     document.removeEventListener('visibilitychange', this.bindIntervalEvent)
   },
   methods: {
+    getStep(key) {
+      let defaultVal
+      if (key === 'price_step') {
+        defaultVal = this.toNonExponential(
+          10 ** (0 - this.priceDigits),
+          this.priceDigits
+        )
+      } else if (key === 'amount_step') {
+        defaultVal = this.toNonExponential(
+          10 ** (0 - this.amountDigits),
+          this.amountDigits
+        )
+      } else if (key === 'total_step') {
+        defaultVal = this.toNonExponential(
+          10 ** (0 - this.totalDigits),
+          this.totalDigits
+        )
+      }
+      return this.pair.form[key] || defaultVal
+    },
+    getMinVal(key) {
+      return this.pair.form[key] || 0
+    },
     async bindIntervalEvent() {
       if (document.visibilityState === 'hidden') {
         this.removeInterval()
@@ -567,8 +587,14 @@ export default {
 
     async getAccountBalance() {
       const hash = this.isBuy ? this.baseHash : this.quoteHash
+      const precision = this.isBuy ? this.basePrecision : this.quotePrecision
+
       const balance = await CybexDotClient.getBalance(hash, this.accountId)
-      this.balances = balance ? balance.freeBalance : null
+      this.balances = balance ? balance.freeBalance / 10 ** precision : null
+      this.balances = this.$options.filters.floorDigits(
+        this.balances,
+        this.isBuy ? this.balanceDigits.base : this.balanceDigits.quote
+      )
     },
     async initBalanceAndFee() {
       const func = async () => {
@@ -671,9 +697,22 @@ export default {
     },
     beforeCreateTrade() {
       // 强制显示精度
-      // this.price = parseFloat(this.price).toFixed(this.pricedigits)
-      this.amount = parseFloat(this.amount).toFixed(this.amountdigits)
-      this.total = parseFloat(this.total).toFixed(this.totaldigits)
+      this.price = this.$options.filters.shortenPrice(
+        parseFloat(this.price).toFixed(this.priceDigits)
+      )
+
+      if (this.isBuy) {
+        this.amount = parseFloat(this.total / this.price).toFixed(
+          this.amountDigits
+        )
+        this.total = parseFloat(this.total).toFixed(this.totalDigits)
+      } else {
+        this.amount = parseFloat(this.amount).toFixed(this.amountDigits)
+        this.total = parseFloat(this.price * this.amount).toFixed(
+          this.totalDigits
+        )
+      }
+
       // 检查用户是否已锁
 
       if (this.isLocked) {
@@ -716,11 +755,13 @@ export default {
       if (!this.validateForm()) return false
       this.isCreatingTrade = true
       this.couldConfirmCreateTrade = false
-
+      const precision = this.isBuy ? this.basePrecision : this.quotePrecision
       const result = await CybexDotClient.createLimitOrder(
         this.isBuy,
-        this.price,
-        this.amount
+        this.price * 10 ** -this.priceMatchedPrecision, // 精度不一致
+        this.isBuy
+          ? this.total * 10 ** precision
+          : this.amount * 10 ** precision
       )
 
       if (result !== null) {

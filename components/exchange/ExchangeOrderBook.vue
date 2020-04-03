@@ -111,6 +111,7 @@ import { mapGetters } from 'vuex'
 import { maxBy, concat, take, takeRight } from 'lodash'
 import utils from '~/components/mixins/utils'
 import CybexDotClient from '~/lib/CybexDotClient.js'
+import config from '~/lib/config/config'
 
 export default {
   mixins: [utils],
@@ -129,9 +130,9 @@ export default {
   },
   computed: {
     ...mapGetters({
-      priceDigits: 'exchange/priceDigits',
       legalSymbol: 'i18n/symbol',
       locale: 'i18n/locale',
+      priceDigits: 'exchange/priceDigits',
       currentOrderPrice: 'exchange/currentRTEPrice',
       currentOrderLegalPrice: 'exchange/currentOrderLegalPrice',
       refreshRate: 'exchange/tradesRefreshRate'
@@ -159,25 +160,21 @@ export default {
       return r
     },
     digitsPrice() {
-      const defaultDigits = 8
-
-      return defaultDigits
+      return this.pair.book.last_price || 5
     },
     digitsAmount() {
-      const defaultDigits = 0
-
-      return defaultDigits
+      return this.pair.book.amount || 5
     },
     digitsTotal() {
-      const defaultDigits = 0
-
-      return defaultDigits
+      return this.pair.book.total || 5
     },
     currentGroupDecimal: {
       get() {
         return this.priceDigits
       },
-      set(v) {}
+      set(v) {
+        this.$store.commit('exchange/SET_PRICE_DIGITS', v)
+      }
     }
   },
   watch: {
@@ -425,16 +422,20 @@ export default {
 
         this.orderSellRows = orderBook[0].map((o) => {
           return {
-            price: o.price / 10 ** 8,
-            amount: o.sell_amount,
-            total: o.buy_amount
+            price:
+              (o.price * 10 ** this.priceMatchedPrecision) /
+              config.pricePrecision,
+            amount: o.sell_amount / 10 ** this.quotePrecision,
+            total: o.buy_amount / 10 ** this.basePrecision
           }
         })
         this.orderBuyRows = orderBook[1].map((o) => {
           return {
-            price: o.price / 10 ** 8,
-            amount: o.buy_amount,
-            total: o.sell_amount
+            price:
+              (o.price * 10 ** this.priceMatchedPrecision) /
+              config.pricePrecision,
+            amount: o.buy_amount / 10 ** this.quotePrecision,
+            total: o.sell_amount / 10 ** this.basePrecision
           }
         })
       }

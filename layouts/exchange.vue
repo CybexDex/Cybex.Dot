@@ -11,11 +11,15 @@
     <!-- content start -->
     <v-content>
       <v-container fluid class="pa-0">
-        <perfect-scrollbar :options="{ swipeEasing: false }">
+        <perfect-scrollbar
+          v-if="exchangeInited"
+          :options="{ swipeEasing: false }"
+        >
           <transition name="layout" mode="out-in">
             <nuxt />
           </transition>
         </perfect-scrollbar>
+        <Loading v-else />
       </v-container>
     </v-content>
 
@@ -29,7 +33,8 @@ import PerfectScrollbar from 'perfect-scrollbar'
 
 export default {
   components: {
-    appNav: () => import('~/components/AppNavigation.vue')
+    appNav: () => import('~/components/AppNavigation.vue'),
+    Loading: () => import('~/components/exchange/ExchangeLoading.vue')
   },
   data() {
     return {
@@ -49,18 +54,12 @@ export default {
         await this.initExchange()
         this.exchangeInited = true
       }
-    },
-    async basicInited(newval, oldval) {
-      if (newval && !oldval && !this.exchangeInited) {
-        await this.initExchange()
-        this.exchangeInited = true
-      }
     }
   },
   async mounted() {
     // 滚动条
     this.resizeLayout()
-    if (this.basicInited && !this.exchangeInited) {
+    if (!this.exchangeInited) {
       await this.initExchange()
       this.exchangeInited = true
     }

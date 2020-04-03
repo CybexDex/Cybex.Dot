@@ -59,9 +59,9 @@
               <asset-pairs
                 :max-width="limitAssetSize ? '100px' : null"
                 :max-quote-width="limitAssetSize ? '50px' : null"
-                :quote-id="item.market.quote"
+                :quote-name="item.market.quote"
                 :spacer="false"
-                :base-id="item.market.base"
+                :base-name="item.market.base"
               />
             </td>
             <td
@@ -73,37 +73,19 @@
             >
               {{ $t('exchange.content.' + item.tradetype.toLowerCase()) }}
             </td>
-            <td class="text-xs-left">{{ item.price }}</td>
             <td class="text-xs-left">
-              {{ item.quote_amount | roundDigits(item.asset_digit_amount) }}
+              {{ item.price | floorDigits(digitsPrice) | shortenPrice }}
             </td>
-            <!-- 手续费精度 卖出看base币 买入看quote币-->
-            <!-- <td v-if="item.tradetype == 'buy'" class="text-xs-left keep-inline">
-              {{
-                item.fee.amount | roundDigits(item.asset_digit_quote, 0, '--')
-              }}
-              <asset-pairs
-                v-if="item.fee.amount != 0"
-                :max-width="limitAssetSize ? '50%' : null"
-                :asset-id="item.fee.asset_id"
-              />
+            <td class="text-xs-left">
+              {{ item.quote_amount | roundDigits(digitsAmount) }}
             </td>
-            <td v-else class="text-xs-left keep-inline">
-              {{
-                item.fee.amount | roundDigits(item.asset_digit_base, 0, '--')
-              }}
-              <asset-pairs
-                v-if="item.fee.amount != 0"
-                :max-width="limitAssetSize ? '50%' : null"
-                :asset-id="item.fee.asset_id"
-              />
-            </td> -->
+
             <!-- 成交总金额 根据base币资产精度-->
             <td class="text-xs-right keep-inline">
-              {{ item.base_amount | roundDigits(item.asset_digit_base) }}
+              {{ item.base_amount | roundDigits(digitsTotal) }}
               <asset-pairs
                 :max-width="limitAssetSize ? '50%' : null"
-                :asset-id="item.market.base"
+                :asset-name="item.market.base"
               />
             </td>
           </tr>
@@ -122,6 +104,7 @@
 import { mapGetters } from 'vuex'
 import utils from '~/components/mixins/utils'
 import CybexDotClient from '~/lib/CybexDotClient.js'
+import config from '~/lib/config/config'
 
 export default {
   components: {
@@ -246,6 +229,15 @@ export default {
             : null,
         white_flag: this.whiteFlag
       })
+    },
+    digitsPrice() {
+      return this.pair.book.last_price || 5
+    },
+    digitsAmount() {
+      return this.pair.book.amount || 5
+    },
+    digitsTotal() {
+      return this.pair.book.total || 5
     }
   },
   watch: {
@@ -359,46 +351,6 @@ export default {
       }, time)
     },
 
-    digitsPrice(item) {
-      const base =
-        item && item.market
-          ? this.coinName(item.market.base, this.coinMap)
-          : this.baseName
-      const quote =
-        item && item.market
-          ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteName
-      const defaultDigits = this.isCustomPair(
-        item.market.base,
-        item.market.quote
-      )
-        ? 8
-        : 5
-      return this.getPairConfig(
-        base,
-        quote,
-        'book',
-        'last_price',
-        defaultDigits
-      )
-    },
-    digitsAmount(item) {
-      const base =
-        item && item.market
-          ? this.coinName(item.market.base, this.coinMap)
-          : this.baseName
-      const quote =
-        item && item.market
-          ? this.coinName(item.market.quote, this.coinMap)
-          : this.quoteName
-      const defaultDigits = this.isCustomPair(
-        item.market.base,
-        item.market.quote
-      )
-        ? item.asset_digit_quote
-        : 5
-      return this.getPairConfig(base, quote, 'book', 'amount', defaultDigits)
-    },
     onScroll(event) {
       // this.offsetTop = e.target.scrollTop;
       // 提早一行loading
@@ -433,17 +385,15 @@ export default {
           return {
             time: v.datetime,
             tradetype: v.otype === 0 ? 'buy' : 'sell',
-            price: v.price / 10 ** 8,
-            base_amount: v.base_amount,
-            quote_amount: v.quote_amount,
-            fee: {
-              amount: 0,
-              asset_id: '1.3.0'
-            },
+            price:
+              (v.price * 10 ** this.priceMatchedPrecision) /
+              config.pricePrecision,
+            base_amount: v.base_amount / 10 ** this.basePrecision,
+            quote_amount: v.quote_amount / 10 ** this.quotePrecision,
+
             market: {
-              base: v.base === CybexDotClient.baseTokenHash ? '1.3.27' : v.base,
-              quote:
-                v.quote === CybexDotClient.quoteTokenHash ? '1.3.0' : v.quote
+              base: this.baseName,
+              quote: this.quoteName
             }
           }
         })

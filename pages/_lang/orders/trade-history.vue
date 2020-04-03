@@ -4,7 +4,7 @@
       {{ $t('exchange.order-table.tab-title.history-trade') }}
     </div>
     <v-tabs v-model="active" class="asset-tabs" slider-color="cybex" dark>
-      <v-tab v-for="(tabItem, idx) in tabItems" :key="idx" ripple="false">{{
+      <v-tab v-for="(tabItem, idx) in tabItems" :key="idx" :ripple="false">{{
         tabItem.title
       }}</v-tab>
       <v-tab-item v-for="(tabItem, idx) in tabItems" :key="idx">

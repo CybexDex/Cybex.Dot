@@ -49,7 +49,11 @@ export default {
       src: '~plugins/wallet',
       mode: 'client'
     },
-    '~plugins/global-components'
+    '~plugins/global-components',
+    {
+      src: '~plugins/client-init',
+      mode: 'client'
+    }
   ],
   /*
    ** Nuxt.js dev-modules

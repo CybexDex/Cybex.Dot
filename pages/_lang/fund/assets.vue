@@ -22,8 +22,8 @@
               :content="$t('tooltip.balance_all')"
               :offset="120"
             />
-            <h2>{{ total.balance | floorDigits(5) }} CYB</h2>
-            <p class="in-cny mt-1">≈{{ total.value | legalDigits(symbol) }}</p>
+            <!-- <h2>{{ total.balance | floorDigits(5) }} CYB</h2>
+            <p class="in-cny mt-1">≈{{ total.value | legalDigits(symbol) }}</p> -->
           </div>
         </v-flex>
         <v-flex xs5>

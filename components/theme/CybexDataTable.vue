@@ -117,7 +117,7 @@ export default {
         {
           class: this.classes
         },
-        [this.genTHead(), this.genTBody(), this.genTFoot()]
+        [this.genHeaders(), this.genTBody(), this.genFooters()]
       )
     ])
     let table = h(

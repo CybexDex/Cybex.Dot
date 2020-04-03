@@ -84,9 +84,9 @@
               <asset-pairs
                 :max-width="limitAssetSize ? '100px' : null"
                 :max-quote-width="limitAssetSize ? '50px' : null"
-                :quote-id="item.market.quote"
+                :quote-name="item.market.quote"
                 :spacer="false"
-                :base-id="item.market.base"
+                :base-name="item.market.base"
               />
             </td>
             <!-- 卖单向上取整，买单向下取整 -->
@@ -94,30 +94,34 @@
               <td class="text-xs-center text-uppercase c-buy">
                 {{ $t('exchange.content.' + item.tradetype.toLowerCase()) }}
               </td>
-              <td class="text-xs-center">{{ item.price }}</td>
               <td class="text-xs-center">
-                {{ item.amount | floorDigits(item.asset_digit_amount) }}
+                {{ item.price | floorDigits(digitsPrice) | shortenPrice }}
+              </td>
+              <td class="text-xs-center">
+                {{ item.amount | floorDigits(digitsAmount) }}
               </td>
               <td class="text-xs-center">
                 {{ (item.filled * 100) | floorDigits(2) }}%
               </td>
               <td class="text-xs-right">
-                {{ item.total | floorDigits(item.asset_digit_total) }}
+                {{ item.total | floorDigits(digitsTotal) }}
               </td>
             </template>
             <template v-else>
               <td class="text-xs-center text-uppercase c-sell">
                 {{ $t('exchange.content.' + item.tradetype.toLowerCase()) }}
               </td>
-              <td class="text-xs-center">{{ item.price }}</td>
               <td class="text-xs-center">
-                {{ item.amount | ceilDigits(item.asset_digit_amount) }}
+                {{ item.price | ceilDigits(digitsPrice) | shortenPrice }}
+              </td>
+              <td class="text-xs-center">
+                {{ item.amount | ceilDigits(digitsAmount) }}
               </td>
               <td class="text-xs-center">
                 {{ (item.filled * 100) | floorDigits(2) }}%
               </td>
               <td class="text-xs-right">
-                {{ item.total | ceilDigits(item.asset_digit_total) }}
+                {{ item.total | ceilDigits(digitsTotal) }}
               </td>
             </template>
             <td align="left">
@@ -201,6 +205,7 @@
 import { mapGetters } from 'vuex'
 import utils from '~/components/mixins/utils'
 import CybexDotClient from '~/lib/CybexDotClient.js'
+import config from '~/lib/config/config'
 
 export default {
   components: {},
@@ -309,6 +314,8 @@ export default {
   },
   computed: {
     ...mapGetters({
+      isLocked: 'auth/islocked',
+
       username: 'auth/username',
       accountId: 'auth/address',
 
@@ -317,6 +324,15 @@ export default {
     }),
     limitAssetSize() {
       return this.mode === 'exchange' && this.innerWidth <= 1440
+    },
+    digitsPrice() {
+      return this.pair.book.last_price || 5
+    },
+    digitsAmount() {
+      return this.pair.book.amount || 5
+    },
+    digitsTotal() {
+      return this.pair.book.total || 5
     }
   },
 
@@ -336,10 +352,6 @@ export default {
     },
     bases(v) {},
     isLocked(v) {
-      if (!v && this.needCancelAllDialog) {
-        this.confirmCancelAllDialog = true
-        this.needCancelAllDialog = false
-      }
       if (!v && this.needCancelDialog) {
         this.confirmDialog = true
         this.needCancelDialog = false
@@ -400,16 +412,6 @@ export default {
         this.showFixedHeader = true
       }
     },
-    digitsPrice(item) {
-      return 5
-    },
-    digitsAmount(item) {
-      return 5
-    },
-    digitsTotal(item) {
-      return 5
-    },
-
     confirmCancelOrder(order) {
       this.cancelIds = [order.id]
       // 检查用户是否已锁
@@ -502,21 +504,25 @@ export default {
                 id: v.hash,
                 time: v.datetime,
                 tradetype: v.otype === 0 ? 'buy' : 'sell',
-                price: v.price / 10 ** 8,
-                amount: v.otype === 0 ? v.buy_amount : v.sell_amount,
+                price:
+                  (v.price * 10 ** this.priceMatchedPrecision) /
+                  config.pricePrecision,
+                amount:
+                  v.otype === 0
+                    ? v.buy_amount / 10 ** this.quotePrecision
+                    : v.sell_amount / 10 ** this.quotePrecision,
                 market: {
-                  base:
-                    v.base === CybexDotClient.baseTokenHash ? '1.3.27' : v.base,
-                  quote:
-                    v.quote === CybexDotClient.quoteTokenHash
-                      ? '1.3.0'
-                      : v.quote
+                  base: this.baseName,
+                  quote: this.quoteName
                 },
                 filled:
                   v.otype === 0
                     ? (v.buy_amount - v.remained_buy_amount) / v.buy_amount
                     : (v.sell_amount - v.remained_sell_amount) / v.sell_amount,
-                total: v.otype === 0 ? v.sell_amount : v.buy_amount
+                total:
+                  v.otype === 0
+                    ? v.sell_amount / 10 ** this.basePrecision
+                    : v.buy_amount / 10 ** this.basePrecision
               }
             })
           : []

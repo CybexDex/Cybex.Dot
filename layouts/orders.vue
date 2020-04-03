@@ -6,8 +6,8 @@
     <!-- content start -->
     <v-content>
       <v-container fluid>
-        <perfect-scrollbar v-if="basicInited" :options="{ swipeEasing: false }">
-          <nuxt v-if="basicInited" />
+        <perfect-scrollbar :options="{ swipeEasing: false }">
+          <nuxt />
         </perfect-scrollbar>
       </v-container>
     </v-content>
