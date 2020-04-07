@@ -42,6 +42,7 @@
                 :white-flag="'white'"
                 :enable-interval="currentTab == 2"
                 :order-filter="orderFilter"
+                :mode="'exchange'"
               />
             </v-tab-item>
           </v-tabs>

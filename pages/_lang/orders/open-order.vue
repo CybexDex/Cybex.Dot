@@ -10,7 +10,7 @@
         {{ tabItem.title }}
       </v-tab>
       <v-tab-item v-for="(tabItem, idx) in tabItems" :key="idx">
-        <div class="orders-area full-mode order-list">
+        <div class="orders-area order-list">
           <ExchangeOpenOrder
             :white-flag="tabItem.whiteFlag"
             :mode="'full'"
@@ -35,11 +35,7 @@ export default {
       openOrderRowLen: 0,
       openCustomOrderRowLen: 0,
       openGameOrderRowLen: 0,
-      tabItems: [
-        { title: this.$t('tab_label.main'), whiteFlag: 'white' },
-        { title: this.$t('tab_label.others'), whiteFlag: 'custom' },
-        { title: this.$t('tab_label.game'), whiteFlag: 'game' }
-      ]
+      tabItems: [{ title: this.$t('tab_label.main'), whiteFlag: 'white' }]
     }
   },
   computed: {

@@ -10,32 +10,33 @@
             middle
             :placeholder="$t('placeholder.enter_address')"
             clearable
+            append-icon="fa-map-marker-alt"
             @input="onAddressChanged"
           >
             <span slot="append-label">
               <v-icon size="16" class="mr-2">ic-balance_wallet</v-icon>
               {{ balance | roundDigits(precision) }} {{ coinname }}
             </span>
-            <!-- <div
-                slot="append"
-                bottom>
-                <v-menu>
-                  <div
-                    slot="activator"
-                    class="input-address">
-                    <v-icon>fa-map-marker-alt</v-icon>
+            <!-- <div v-slot:append bottom>
+              <v-menu>
+                <template v-slot:activator="{ on }">
+                  <div class="input-address" v-on="on">
+                    <v-icon></v-icon>
                     <span>{{ $t('button.address') }}</span>
                   </div>
-                  <v-list>
-                    <v-list-tile
-                      v-for="(addr, index) in addrs"
-                      :key="index"
-                      @click="selectAddress(addr)">
-                      <v-list-tile-title>{{ addr }}</v-list-tile-title>
-                    </v-list-tile>
-                  </v-list>
-                </v-menu>
-            </div>-->
+                </template>
+
+                <v-list>
+                  <v-list-item
+                    v-for="(addr, index) in addrs"
+                    :key="index"
+                    @click="selectAddress(addr)"
+                  >
+                    <v-list-item-title>{{ addr }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </div> -->
           </v-text-field>
           <p class="error-msg">
             {{
@@ -211,7 +212,6 @@ export default {
   mixins: [utils],
 
   asyncData({ params, store }) {
-    store.commit('UPDATE_DW_COINTYPE', params.cointype)
     return {
       cointype: params.cointype || '',
       isAddressValid: false,
@@ -240,7 +240,8 @@ export default {
       memoChecked: false,
       precision: 0,
       cybexPrecision: 0,
-      isMemoValid: false
+      isMemoValid: false,
+      assetConfig: []
     }
   },
   computed: {

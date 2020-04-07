@@ -349,7 +349,11 @@
     "pending": "待确认",
     "done": "成功",
     "failed": "失败",
-    "transfer_notice": "<p class='add'>您将转出您的资产到他人Cybex账户。</p><p class='add'>本次操作将执行一次Cybex内盘转账，该手续费使用CYB支付，如果CYB余额不足，将使用您希望转出的目标资产支付。</p><ul><li><p>请务必确认您的转账账户正确，否则您的资产将会丢失。</p></li><li><p>转账确认需要一定时限，请耐心等待。</p></li></ul>",
+    "transfer_notice_title": "您将转出您的资产到他人Cybex账户。",
+    "transfer_notice_title2": "本次操作将执行一次Cybex内盘转账，该手续费使用CYB支付，如果CYB余额不足，将使用您希望转出的目标资产支付。",
+    "transfer_notice_list1": "请务必确认您的转账账户正确，否则您的资产将会丢失。",
+    "transfer_notice_list2": "转账确认需要一定时限，请耐心等待。",
+
     "send": "付款",
     "receive": "收款",
     "invalid_memokey": "暂无权限",

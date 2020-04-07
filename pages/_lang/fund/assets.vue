@@ -7,8 +7,8 @@
         <h1 class="whole-name-tip" :title="username">
           {{ username }}
         </h1>
-        <span v-if="address" class="userinfo-id">{{
-          'Address: ' + address
+        <span v-if="accountId" class="userinfo-id">{{
+          'Address: ' + accountId
         }}</span>
       </div>
       <v-spacer />
@@ -22,8 +22,8 @@
               :content="$t('tooltip.balance_all')"
               :offset="120"
             />
-            <!-- <h2>{{ total.balance | floorDigits(5) }} CYB</h2>
-            <p class="in-cny mt-1">≈{{ total.value | legalDigits(symbol) }}</p> -->
+            <h2>{{ balance | floorDigits(5) }} CYB</h2>
+            <!-- <p class="in-cny mt-1">≈{{ total.value | legalDigits(symbol) }}</p> -->
           </div>
         </v-flex>
         <v-flex xs5>
@@ -76,6 +76,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import utils from '~/components/mixins/utils'
+import CybexDotClient from '~/lib/CybexDotClient'
 
 export default {
   components: {
@@ -86,6 +87,7 @@ export default {
   mixins: [utils],
   data() {
     return {
+      balance: '',
       tabs: [
         {
           label: this.$t('tab_label.portfolio'),
@@ -98,7 +100,7 @@ export default {
   computed: {
     ...mapGetters({
       username: 'auth/username',
-      address: 'auth/address',
+      accountId: 'auth/address',
 
       symbol: 'i18n/symbol',
       locale: 'i18n/locale'
@@ -118,7 +120,10 @@ export default {
   },
   watch: {},
 
-  async mounted() {},
+  async mounted() {
+    const balance = await CybexDotClient.getSystemBalance(this.accountId)
+    this.balance = balance ? balance.systemBalance : null
+  },
   head() {
     return {
       title: this.$t('title.portfolio')

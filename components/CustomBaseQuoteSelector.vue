@@ -34,21 +34,21 @@
           solo
         >
           <template slot="no-data">
-            <v-list-tile>
-              <v-list-tile-title v-if="!searchAssetQuote">{{
+            <v-list-item>
+              <v-list-item-title v-if="!searchAssetQuote">{{
                 $t('custom.search-placeholder')
-              }}</v-list-tile-title>
-              <v-list-tile-title v-else-if="!isLoadingSearchAssetQuote">{{
+              }}</v-list-item-title>
+              <v-list-item-title v-else-if="!isLoadingSearchAssetQuote">{{
                 $t('custom.no-result')
-              }}</v-list-tile-title>
-            </v-list-tile>
+              }}</v-list-item-title>
+            </v-list-item>
           </template>
           <template slot="item" slot-scope="{ item }">
-            <v-list-tile-content>
-              <v-list-tile-title :title="item.symbol">
+            <v-list-item-content>
+              <v-list-item-title :title="item.symbol">
                 <asset-pairs :asset-id="item.symbol" />
-              </v-list-tile-title>
-            </v-list-tile-content>
+              </v-list-item-title>
+            </v-list-item-content>
           </template>
         </v-autocomplete>
       </v-flex>
@@ -80,21 +80,21 @@
           solo
         >
           <template slot="no-data">
-            <v-list-tile>
-              <v-list-tile-title v-if="!searchAssetBase">{{
+            <v-list-item>
+              <v-list-item-title v-if="!searchAssetBase">{{
                 $t('custom.search-placeholder')
-              }}</v-list-tile-title>
-              <v-list-tile-title v-else-if="!isLoadingSearchAssetBase">{{
+              }}</v-list-item-title>
+              <v-list-item-title v-else-if="!isLoadingSearchAssetBase">{{
                 $t('custom.no-result')
-              }}</v-list-tile-title>
-            </v-list-tile>
+              }}</v-list-item-title>
+            </v-list-item>
           </template>
           <template slot="item" slot-scope="{ item }">
-            <v-list-tile-content>
-              <v-list-tile-title :title="item.symbol">
+            <v-list-item-content>
+              <v-list-item-title :title="item.symbol">
                 <asset-pairs :asset-id="item.symbol" />
-              </v-list-tile-title>
-            </v-list-tile-content>
+              </v-list-item-title>
+            </v-list-item-content>
           </template>
         </v-autocomplete>
       </v-flex>

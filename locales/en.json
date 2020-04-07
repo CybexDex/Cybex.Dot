@@ -349,7 +349,11 @@
     "pending": "Pending",
     "done": "Done",
     "failed": "Failed",
-    "transfer_notice": "<p class='add'>You are going to transfer your assets to other's Cybex account.</p><p class='add'>This will require a transfer transaction within CYBEX, the transaction fee of which will be paid in CYB. If your CYB balance is insufficient, the fee will be deducted from your transaction asset.</p><ul><li><p>Please make sure the accout of recipient is correct, otherwise you may lose the asset permanently.</p></li><li><p>It may take some time for each transfer to be confirmed, please kindly be patient.</p></li></ul>",
+    "transfer_notice_title": "You are going to transfer your assets to other's Cybex account.",
+    "transfer_notice_title2": "This will require a transfer transaction within CYBEX, the transaction fee of which will be paid in CYB. If your CYB balance is insufficient, the fee will be deducted from your transaction asset.",
+    "transfer_notice_list1": "Please make sure the accout of recipient is correct, otherwise you may lose the asset permanently.",
+    "transfer_notice_list2": "It may take some time for each transfer to be confirmed, please kindly be patient.",
+
     "send": "Send",
     "receive": "Receive",
     "invalid_memokey": "Missing permission",

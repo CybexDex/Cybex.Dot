@@ -34,105 +34,68 @@
           <v-data-table
             :headers="tbItems"
             :items="itemDatas"
-            :loading="!assets"
+            :loading="!assetsData"
             hide-default-footer
             :dark="false"
           >
-            <template slot="headerCell" slot-scope="props">
-              <a
-                v-if="props.header.canSort"
-                class="table-tlt"
-                @click="onSortClick(props)"
-              >
-                {{ props.header.text }}
-                <v-icon>{{
-                  props.header.value === sortBase
-                    ? sortMap[props.header.value] === 'asc'
-                      ? 'ic-sort_up'
-                      : 'ic-sort_down'
-                    : 'ic-sort'
-                }}</v-icon>
-              </a>
-              <span v-else class="table-tlt">{{ props.header.text }}</span>
+            <template v-slot:header="props">
+              <thead>
+                <tr v-for="header in props.headers" :key="header.text">
+                  <th>
+                    <a
+                      v-if="props.header.canSort"
+                      class="table-tlt"
+                      @click="onSortClick(props)"
+                    >
+                      {{ props.header.text }}
+                      <v-icon>{{
+                        props.header.value === sortBase
+                          ? sortMap[props.header.value] === 'asc'
+                            ? 'ic-sort_up'
+                            : 'ic-sort_down'
+                          : 'ic-sort'
+                      }}</v-icon>
+                    </a>
+                    <span v-else class="table-tlt">{{
+                      props.header.text
+                    }}</span>
+                  </th>
+                </tr>
+              </thead>
             </template>
-            <template slot="items" slot-scope="props">
-              <tr
-                :class="
-                  props.item.asset_type === endTopItem.asset_type
-                    ? 'top-end'
-                    : ''
-                "
-              >
+            <template v-slot:item="{ item }">
+              <tr :class="item.name === endTopItem.name ? 'top-end' : ''">
                 <td class="text-xs-left">
                   <div class="coin-icon-wrap d-flex">
-                    <v-img
-                      :src="iconMap[props.item.asset_type]"
+                    <!-- <v-img
                       class="coin-icon ml-4"
-                    />
-                    {{ props.item.asset_type | coinName(coinMap) }}
+                    /> -->
+                    {{ item.name }}
                   </div>
                 </td>
                 <td class="text-xs-right">
-                  {{
-                    props.item.balance | floorDigits(props.item.precision || 6)
-                  }}
+                  {{ item.balance | floorDigits(item.precision || 6) }}
                 </td>
                 <td class="text-xs-right">
                   {{
-                    (props.item.frozenBalance || 0)
-                      | floorDigits(props.item.precision || 6)
+                    (item.frozenBalance || 0) | floorDigits(item.precision || 6)
                   }}
                 </td>
-                <td class="text-xs-right pr-1">
-                  <template
-                    v-if="
-                      !coinMap[props.item.asset_type].startsWith(game_prefix)
-                    "
-                  >
-                    <div>
-                      {{
-                        props.item.legalValue > 0
-                          ? props.item.cybValue
-                          : 0 | floorDigits(5, -1)
-                      }}
-                    </div>
-                  </template>
-                </td>
-                <td class="text-xs-left pa-0 value-equal">
-                  <template
-                    v-if="
-                      !coinMap[props.item.asset_type].startsWith(game_prefix)
-                    "
-                    >≈
-                    {{
-                      props.item.legalValue > 0
-                        ? props.item.legalValue
-                        : 0 | legalDigits(symbol)
-                    }}</template
-                  >
-                </td>
+
                 <td class="text-xs-right op">
                   <div class="op-wrap">
-                    <template v-if="props.item.asset_type !== '1.3.0'">
+                    <template v-if="item.name !== 'CYB'">
                       <a
-                        v-if="props.item.depositSwitch"
+                        v-if="item.depositSwitch"
                         class="op-item border"
-                        @click="
-                          jumpTo(
-                            `/fund/deposit/${coinMap[props.item.asset_type]}`
-                          )
-                        "
+                        @click="$i18n.jumpTo(`/fund/deposit/${item.name}`)"
                         >{{ $t('button.deposit') }}</a
                       >
                       <template v-else>
                         <v-tooltip
-                          v-if="
-                            (props.item.whyNotDeposit || {})[
-                              `${localeShort}Msg`
-                            ]
-                          "
+                          v-if="(item.whyNotDeposit || {})[`${localeShort}Msg`]"
                           :class="{
-                            unopen: !props.item.depositSwitch,
+                            unopen: !item.depositSwitch,
                             border: true
                           }"
                           content-class="why-forbid-tip"
@@ -145,9 +108,7 @@
                           </template>
 
                           <span>{{
-                            (props.item.whyNotDeposit || {})[
-                              `${localeShort}Msg`
-                            ]
+                            (item.whyNotDeposit || {})[`${localeShort}Msg`]
                           }}</span>
                         </v-tooltip>
                         <span v-else class="op-item unopen border">{{
@@ -155,24 +116,18 @@
                         }}</span>
                       </template>
                       <a
-                        v-if="props.item.withdrawSwitch"
+                        v-if="item.withdrawSwitch"
                         class="op-item border"
-                        @click="
-                          jumpTo(
-                            `/fund/withdraw/${coinMap[props.item.asset_type]}`
-                          )
-                        "
+                        @click="$i18n.jumpTo(`/fund/withdraw/${item.name}`)"
                         >{{ $t('button.withdraw') }}</a
                       >
                       <template v-else>
                         <v-tooltip
                           v-if="
-                            (props.item.whyNotWithdraw || {})[
-                              `${localeShort}Msg`
-                            ]
+                            (item.whyNotWithdraw || {})[`${localeShort}Msg`]
                           "
                           :class="{
-                            unopen: !props.item.depositSwitch,
+                            unopen: !item.depositSwitch,
                             border: true
                           }"
                           content-class="why-forbid-tip"
@@ -185,9 +140,7 @@
                           </template>
 
                           <span>{{
-                            (props.item.whyNotWithdraw || {})[
-                              `${localeShort}Msg`
-                            ]
+                            (item.whyNotWithdraw || {})[`${localeShort}Msg`]
                           }}</span>
                         </v-tooltip>
                         <span v-else class="op-item unopen border">{{
@@ -197,40 +150,33 @@
                     </template>
                     <div v-else style="width: 168px;" />
                     <v-menu
-                      v-if="(quoteList[props.item.asset_type] || []).length > 0"
+                      v-if="(quoteList[item.name] || []).length > 0"
                       bottom
                       width="42"
                       :nudge-bottom="20"
                     >
-                      <a
-                        slot="activator"
-                        class="op-item last"
-                        @click="onExchangeClicked"
-                        >{{ $t('button.exchange') }}</a
-                      >
+                      <template v-slot:activator="{ on }">
+                        <a
+                          class="op-item last"
+                          v-on="on"
+                          @click="onExchangeClicked"
+                          >{{ $t('button.exchange') }}</a
+                        >
+                      </template>
+
                       <div class="switch-exchange">
                         <v-list>
-                          <v-list-tile
-                            v-for="(base, index) in quoteList[
-                              props.item.asset_type
-                            ]"
+                          <v-list-item
+                            v-for="(base, index) in quoteList[item.name]"
                             :key="index"
                             @click="
-                              jumpTo(
-                                `/exchange/${coinMap[props.item.asset_type]}_${
-                                  coinMap[base]
-                                }`
-                              )
+                              $i18n.jumpTo(`/exchange/${item.name}_${base}`)
                             "
                           >
-                            <v-list-tile-title
-                              >{{
-                                props.item.asset_type | coinName(coinMap)
-                              }}/{{
-                                base | coinName(coinMap)
-                              }}</v-list-tile-title
+                            <v-list-item-title
+                              >{{ item.name }}/{{ base }}</v-list-item-title
                             >
-                          </v-list-tile>
+                          </v-list-item>
                         </v-list>
                       </div>
                     </v-menu>
@@ -241,7 +187,7 @@
                 </td>
               </tr>
             </template>
-            <template slot="no-data">
+            <template v-slot:no-data>
               <h4 class="text-center">{{ $t('info.no_data') }}</h4>
             </template>
           </v-data-table>
@@ -252,10 +198,11 @@
 </template>
 
 <script>
-import { filter, orderBy, pickBy, keys } from 'lodash'
+import { filter, orderBy } from 'lodash'
 import { mapGetters } from 'vuex'
 import utils from '~/components/mixins/utils'
 import config from '~/lib/config/config.js'
+import CybexDotClient from '~/lib/CybexDotClient'
 
 export default {
   components: {
@@ -265,9 +212,9 @@ export default {
 
   data() {
     return {
+      assetsData: null,
       hideSmall: false,
       querystr: '',
-      assets: null,
       tbItems: [
         {
           text: this.$t('table_title.coin'),
@@ -279,29 +226,18 @@ export default {
         {
           text: this.$t('table_title.avaliable_balance'),
           value: 'balance',
-          align: 'right',
+          align: 'left',
           sortable: false,
           canSort: true
         },
         {
           text: this.$t('table_title.frozen'),
           value: 'frozenBalance',
-          align: 'right',
+          align: 'left',
           sortable: false,
           canSort: true
         },
-        {
-          text: this.$t('table_title.balance_value'),
-          value: 'cybValue',
-          align: 'right',
-          sortable: false,
-          canSort: true,
-          class: 'pr-0'
-        },
-        {
-          text: '',
-          sortable: false
-        },
+
         {
           text: this.$t('table_title.operation'),
           align: 'right',
@@ -326,21 +262,18 @@ export default {
       username: 'auth/username',
       locale: 'i18n/locale',
       localeShort: 'i18n/shortcut',
-      symbol: 'i18n/symbol'
+      symbol: 'i18n/symbol',
+      accountId: 'auth/address'
     }),
-    iconMap() {
-      return this.icons || []
-    },
+
     itemDatas() {
-      const filteredList = filter(this.assets || [], (item) => {
+      const filteredList = filter(this.assetsData || [], (item) => {
         return (
-          (!this.querystr ||
-            this.coinName(item.asset_type, this.coinMap).includes(
-              this.querystr.toUpperCase()
-            )) &&
+          (!this.querystr || item.name.includes(this.querystr.toUpperCase())) &&
           (!this.hideSmall || item.cybValue >= this.smallAmount)
         )
       })
+
       return filteredList
     },
     endTopItem() {
@@ -348,15 +281,21 @@ export default {
     },
     quoteList() {
       const result = {}
-      this.assets.forEach((item) => {
-        const picked = pickBy(this.bases, (i) =>
-          i.data.includes(item.asset_type)
-        )
-        result[item.asset_type] = result[item.asset_type] || []
-        if (picked) {
-          result[item.asset_type] = result[item.asset_type].concat(keys(picked))
+
+      this.assetsData.forEach((item) => {
+        for (const [key, value] of Object.entries(this.marketPairData)) {
+          const filters = value.filter((i) => i.quote.name === item.name)
+
+          if (filters.length) {
+            const old = result[item.name] || []
+            if (old) {
+              old.push(key)
+            }
+            result[item.name] = old
+          }
         }
       })
+
       return result
     }
   },
@@ -368,10 +307,7 @@ export default {
     }
   },
   async mounted() {
-    await this.loadAssets(this.username)
-    try {
-      await this.setupAssetList()
-    } catch (e) {}
+    await this.setupAssetList()
   },
   methods: {
     onSortClick(data) {
@@ -379,14 +315,35 @@ export default {
       const sort = this.sortMap[header.value] === 'desc' ? 'asc' : 'desc'
       this.sortBase = header.value
       this.sortMap[header.value] = sort
-      this.assets = orderBy(
-        this.assets,
+      this.assetsData = orderBy(
+        this.assetsData,
         ['isTop', header.value],
         ['desc', sort]
       )
     },
     onExchangeClicked() {},
-    async setupAssetList() {},
+    async setupAssetList() {
+      const balances = await CybexDotClient.getAllBalance(this.accountId)
+
+      const list = this.assets.map((asset) => {
+        const data = {
+          isTop: 0,
+          depositSwitch: true,
+          withdrawSwitch: true,
+          whyNotWithdraw: null,
+          whyNotDeposit: null,
+          balance: null,
+          frozenBalance: null
+        }
+        data.balance = balances[asset.id].freeBalance / 10 ** asset.precision
+        data.frozenBalance =
+          balances[asset.id].freezedBalance / 10 ** asset.precision
+
+        return { ...data, ...asset }
+      })
+
+      this.assetsData = list
+    },
     createAsset() {
       window.open(
         `${config.links.oldSite}/account/${this.username}/create-asset/`
@@ -458,6 +415,7 @@ export default {
   .coin-icon-wrap {
     display: flex;
     align-items: center;
+    padding-left: 16px;
 
     .coin-icon {
       margin-right: 8px;
@@ -518,7 +476,7 @@ export default {
     }
   }
 
-  table.theme--dark.v-table {
+  .theme--dark.v-data-table {
     .top-end {
       padding-top: 30px;
       height: 62px;
@@ -583,7 +541,7 @@ export default {
     }
 
     td.op {
-      width: 240px;
+      width: 240px !important;
       padding: 0 !important;
 
       .op-wrap {
@@ -594,14 +552,15 @@ export default {
         .v-tooltip {
           @include f-cybex-style('black', medium);
           padding: 0 !important;
-          display: inline;
+          width: 84px !important;
+
           font-size: 12px !important;
           line-height: 32px;
           text-align: center;
-          color: cybex-grey !important;
+          color: map-get($main, grey) !important;
 
           &.border {
-            border-right: solid 0.08em dark;
+            border-right: solid 0.08em map-get($main, 'dark') !important;
           }
 
           &:hover {
@@ -609,7 +568,7 @@ export default {
 
             &,
             & .v-btn__content {
-              background: initial !important;
+              background: map-get($main, initial) !important;
             }
           }
         }
@@ -621,16 +580,16 @@ export default {
         }
 
         .v-tooltip.unopen span.op-item {
-          color: white-opacity-30 !important;
+          color: $white-opacity-30 !important;
         }
 
         span.op-item.unopen,
         .v-tooltip.unopen {
-          color: white-opacity-30 !important;
+          color: $white-opacity-30 !important;
           cursor: not-allowed;
 
           &:hover {
-            color: white-opacity-30 !important;
+            color: $white-opacity-30 !important;
           }
         }
       }

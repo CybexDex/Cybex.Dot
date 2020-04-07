@@ -158,7 +158,6 @@ export default {
   components: {},
   mixins: [utils],
   asyncData({ params, store }) {
-    store.commit('UPDATE_DW_COINTYPE', params.cointype)
     return {
       cointype: params.cointype || '',
       isAccountValid: false
@@ -166,6 +165,8 @@ export default {
   },
   data() {
     return {
+      account: '',
+      accountId: '',
       showConfirm: false,
       amount: null,
       cybexfee: {},
@@ -212,18 +213,7 @@ export default {
           ) <= this.balance)
       )
     },
-    account: {
-      get() {
-        return this.transferTo.name
-      },
-      set(value) {}
-    },
-    accountId: {
-      get() {
-        return this.transferTo.id
-      },
-      set(value) {}
-    },
+
     coinname() {
       return this.$options.filters.shorten(this.cointype)
     }

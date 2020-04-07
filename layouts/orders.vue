@@ -77,9 +77,7 @@ export default {
 }
 .cybex.theme--dark {
   .asset-tabs {
-    .v-tabs__bar {
-      padding: 0 96px 16px 90px;
-    }
+    padding: 0 96px 16px 90px;
   }
 }
 </style>

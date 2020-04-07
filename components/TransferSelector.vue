@@ -59,7 +59,7 @@
               }"
             >
               <v-list>
-                <v-list-tile ripple>
+                <v-list-item ripple>
                   <v-text-field
                     v-model="querystr"
                     middle
@@ -67,9 +67,9 @@
                     prepend-inner-icon="ic-search"
                     :placeholder="$t('placeholder.dw_filter')"
                   />
-                </v-list-tile>
+                </v-list-item>
                 <template v-if="itemList.length > 0">
-                  <v-list-tile
+                  <v-list-item
                     v-for="item in itemList"
                     :key="item.cybid"
                     ripple
@@ -107,13 +107,13 @@
                         >({{ item.projectname }})</span
                       >
                     </div>
-                  </v-list-tile>
+                  </v-list-item>
                 </template>
-                <v-list-tile v-else>
+                <v-list-item v-else>
                   <h4 class="no-data text-center mt-2 mb-2">
                     {{ $t('info.no_data') }}
                   </h4>
-                </v-list-tile>
+                </v-list-item>
               </v-list>
             </perfect-scrollbar>
           </div>
@@ -199,7 +199,16 @@
             </span>
           </div>
           <div v-else class="mt-4 mb-4 notice-local">
-            {{ $t('info.transfer_notice') }}
+            <p class="add">{{ $t('info.transfer_notice_title') }}</p>
+            <p class="add">{{ $t('info.transfer_notice_title2') }}</p>
+            <ul>
+              <li>
+                <p>{{ $t('info.transfer_notice_list1') }}</p>
+              </li>
+              <li>
+                <p>{{ $t('info.transfer_notice_list2') }}</p>
+              </li>
+            </ul>
           </div>
         </div>
       </v-flex>

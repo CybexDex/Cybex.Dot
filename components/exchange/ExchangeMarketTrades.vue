@@ -54,14 +54,13 @@ export default {
       intervalMarketTrade: null,
       trades: [],
       containerWidth: '',
-      isLoading: true,
-      currentOrderPrice: null
-      // currentOrderLegalPrice: null
+      isLoading: true
     }
   },
   computed: {
     ...mapGetters({
-      tradesRefreshRate: 'exchange/tradesRefreshRate'
+      tradesRefreshRate: 'exchange/tradesRefreshRate',
+      currentOrderPrice: 'exchange/currentRTEPrice'
     }),
     digitsPrice() {
       return this.pair.book.last_price || 5
@@ -113,7 +112,11 @@ export default {
 
     async fetchSubstrateMarketTrades() {
       const func = async () => {
-        const trades = await CybexDotClient.getTrades(50)
+        const trades = await CybexDotClient.getTrades(
+          50,
+          null,
+          CybexDotClient.info.tradePairHash
+        )
 
         this.trades = trades.map((t) => {
           return {

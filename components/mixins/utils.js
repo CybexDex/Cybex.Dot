@@ -30,9 +30,33 @@ export default {
     },
     priceMatchedPrecision() {
       return this.quotePrecision - this.basePrecision
+    },
+    marketPairData() {
+      const items = {}
+
+      for (const index in this.pairs) {
+        const pair = this.pairs[index]
+        const item = items[pair.base.name]
+        if (item) {
+          items[pair.base.name].push(pair)
+        } else {
+          items[pair.base.name] = [pair]
+        }
+      }
+      return items
     }
   },
   methods: {
+    getMatchPair(baseHash, quoteHash) {
+      let matchedPair = null
+      for (const pair of this.pairs) {
+        if (pair.base.id === baseHash && pair.quote.id === quoteHash) {
+          matchedPair = pair
+        }
+      }
+
+      return matchedPair
+    },
     /* 科学计数法强制转换
      * @param { String | Number } num
      * @param { Number | Null } dp 小数点限制精度

@@ -70,7 +70,6 @@ export default {
   components: {},
 
   asyncData({ params, store }) {
-    store.commit('UPDATE_DW_COINTYPE', params.cointype)
     return {
       cointype: params.cointype || ''
     }
@@ -81,7 +80,8 @@ export default {
     return {
       address: '',
       message: '',
-      memo: ''
+      memo: '',
+      assetConfig: []
     }
   },
   computed: {

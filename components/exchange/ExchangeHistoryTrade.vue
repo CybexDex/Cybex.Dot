@@ -74,15 +74,17 @@
               {{ $t('exchange.content.' + item.tradetype.toLowerCase()) }}
             </td>
             <td class="text-xs-left">
-              {{ item.price | floorDigits(digitsPrice) | shortenPrice }}
+              {{
+                item.price | floorDigits(digitsPrice(item.pair)) | shortenPrice
+              }}
             </td>
             <td class="text-xs-left">
-              {{ item.quote_amount | roundDigits(digitsAmount) }}
+              {{ item.quote_amount | roundDigits(digitsAmount(item.pair)) }}
             </td>
 
             <!-- 成交总金额 根据base币资产精度-->
             <td class="text-xs-right keep-inline">
-              {{ item.base_amount | roundDigits(digitsTotal) }}
+              {{ item.base_amount | roundDigits(digitsTotal(item.pair)) }}
               <asset-pairs
                 :max-width="limitAssetSize ? '50%' : null"
                 :asset-name="item.market.base"
@@ -229,15 +231,6 @@ export default {
             : null,
         white_flag: this.whiteFlag
       })
-    },
-    digitsPrice() {
-      return this.pair.book.last_price || 5
-    },
-    digitsAmount() {
-      return this.pair.book.amount || 5
-    },
-    digitsTotal() {
-      return this.pair.book.total || 5
     }
   },
   watch: {
@@ -318,6 +311,15 @@ export default {
     document.removeEventListener('visibilitychange', this.bindIntervalEvent)
   },
   methods: {
+    digitsPrice(pair) {
+      return pair.book.last_price || 5
+    },
+    digitsAmount(pair) {
+      return pair.book.amount || 5
+    },
+    digitsTotal(pair) {
+      return pair.book.total || 5
+    },
     onFixedHeader() {
       if (this.$refs.scrollEle.$el && this.$refs.fixHeader) {
         const cols = this.$refs.scrollEle.$el.querySelectorAll(
@@ -379,21 +381,46 @@ export default {
         //   filter.quote_id,
         //   filter.white_flag)
 
-        let tradeRows = await CybexDotClient.getTrades(20, this.accountId)
+        let tradeRows =
+          this.mode === 'exchange'
+            ? await CybexDotClient.getTrades(
+                20,
+                this.accountId,
+                CybexDotClient.info.tradePairHash
+              )
+            : await CybexDotClient.getTrades(20, this.accountId)
         this.isLoading = false
+
         tradeRows = tradeRows.map((v) => {
+          const pair =
+            this.mode === 'exchange'
+              ? this.pair
+              : this.getMatchPair(v.base, v.quote)
+          const basePrecision =
+            this.mode === 'exchange' ? this.basePrecision : pair.base.precision
+          const baseName =
+            this.mode === 'exchange' ? this.baseName : pair.base.name
+          const quotePrecision =
+            this.mode === 'exchange'
+              ? this.quotePrecision
+              : pair.quote.precision
+          const quoteName =
+            this.mode === 'exchange' ? this.quoteName : pair.quote.name
+          const pricePrecision =
+            this.mode === 'exchange'
+              ? this.priceMatchedPrecision
+              : quotePrecision - basePrecision
+
           return {
             time: v.datetime,
             tradetype: v.otype === 0 ? 'buy' : 'sell',
-            price:
-              (v.price * 10 ** this.priceMatchedPrecision) /
-              config.pricePrecision,
-            base_amount: v.base_amount / 10 ** this.basePrecision,
-            quote_amount: v.quote_amount / 10 ** this.quotePrecision,
-
+            price: (v.price * 10 ** pricePrecision) / config.pricePrecision,
+            base_amount: v.base_amount / 10 ** basePrecision,
+            quote_amount: v.quote_amount / 10 ** quotePrecision,
+            pair,
             market: {
-              base: this.baseName,
-              quote: this.quoteName
+              base: baseName,
+              quote: quoteName
             }
           }
         })
