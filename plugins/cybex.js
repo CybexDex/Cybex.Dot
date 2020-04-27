@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import { indexOf } from 'lodash'
 import CybexDotClient from '~/lib/CybexDotClient.js'
+import { getAssets } from '~/lib/gateway-client'
+
 // import defaultPairs from '~/lib/pairs.js'
 // import defaultTokens from '~/lib/tokens.js'
 
@@ -93,6 +95,9 @@ export default async ({ store, app, route }) => {
   store.commit('exchange/SET_PAIRS', pairs)
   const tokens = await CybexDotClient.getTokens()
   store.commit('exchange/SET_ASSETS', tokens)
+  const gwAssets = await getAssets()
+
+  store.commit('gateway/SET_GW_ASSETS', gwAssets)
 
   // TEST
   // store.commit('exchange/SET_PAIRS', defaultPairs)

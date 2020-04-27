@@ -7,49 +7,51 @@
       hide-default-footer
       :dark="false"
     >
-      <template slot="headerCell" slot-scope="props">
-        <span class="table-tlt">{{ props.header.text }}</span>
-      </template>
-      <template slot="items" slot-scope="props">
+      <template v-slot:header="props">
+        <thead>
+          <tr v-for="header in props.headers" :key="header.text">
+            <th>
+              <template v-if="header.text">{{ header.text }}</template>
+            </th>
+          </tr>
+        </thead> </template
+      >>
+      <template v-slot:item="{ item }">
         <tr>
           <td class="text-xs-left">
-            <span>{{ props.item.asset }}</span>
+            <span>{{ item.asset }}</span>
           </td>
           <td class="text-xs-left">
-            {{ $t(`button.${props.item.type.toLowerCase()}`) }}
+            {{ $t(`button.${item.type.toLowerCase()}`) }}
           </td>
           <td class="text-xs-right">
             {{
-              parseFloat(props.item.totalAmount)
-                | floorDigits(props.item.precision || 6)
+              parseFloat(item.totalAmount) | floorDigits(item.precision || 6)
             }}
           </td>
           <td class="text-xs-left">
-            <div class="addr-row" :title="props.item.outAddr">
-              {{ props.item.outAddr }}
+            <div class="addr-row" :title="item.outAddr">
+              {{ item.outAddr }}
             </div>
           </td>
           <td class="text-xs-left">
             <span style="text-transform: capitalize;">{{
-              $t(`info.${props.item.status.toLowerCase()}`)
+              $t(`info.${item.status.toLowerCase()}`)
             }}</span>
           </td>
           <td class="text-xs-right">
-            {{ props.item.updatedAt | date('DD/MM/YYYY HH:mm:ss') }}
+            {{ item.updatedAt | date('DD/MM/YYYY HH:mm:ss') }}
           </td>
           <td class="text-xs-right">
             <!-- use etherscan when no explorer found -->
             <a
-              v-if="
-                (explorers[props.item.asset] || explorers['ETH']) &&
-                  props.item.outHash
-              "
+              v-if="(explorers[item.asset] || explorers['ETH']) && item.outHash"
               class="explorer-link"
               @click="
                 open(
-                  `${
-                    (explorers[props.item.asset] || explorers['ETH']).explorer
-                  }${props.item.outHash}`
+                  `${(explorers[item.asset] || explorers['ETH']).explorer}${
+                    item.outHash
+                  }`
                 )
               "
               >{{ $t('button.view_detail') }}</a
@@ -57,7 +59,7 @@
           </td>
         </tr>
       </template>
-      <template slot="no-data">
+      <template v-slot:no-data>
         <h4 class="text-center">{{ $t('info.no_data') }}</h4>
       </template>
     </v-data-table>
@@ -77,8 +79,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { isEmpty } from 'lodash'
-
+import { getUserRecords } from '~/lib/gateway-client'
 export default {
   props: {
     fundtype: {
@@ -114,7 +115,7 @@ export default {
         {
           text: this.$t('table_title.amount'),
           value: 'amount',
-          align: 'right',
+          align: 'left',
           sortable: false
         },
         {
@@ -133,13 +134,13 @@ export default {
         {
           text: this.$t('table_title.time'),
           value: 'updateAt',
-          align: 'right',
+          align: 'left',
           sortable: false
         },
         {
           text: this.$t('table_title.operation'),
           value: 'balance',
-          align: 'right',
+          align: 'left',
           sortable: false
         }
       ],
@@ -148,7 +149,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      username: 'auth/username'
+      username: 'auth/address',
+      assetConfig: 'gateway/assetConfigByName'
     }),
     itemDatas() {
       return this.history || []
@@ -186,9 +188,6 @@ export default {
     }
   },
   async mounted() {
-    if (!this.assetConfig || isEmpty(this.assetConfig)) {
-      await this.loadAssetConfig()
-    }
     await this.initLoad()
     await this.fetchExplorer()
   },
@@ -201,37 +200,29 @@ export default {
         await this.loadHistory()
       }
     },
-    loadHistory() {
+    async loadHistory() {
       this.history = null
       this.isLoading = true
-      this.$eventHandle(
-        async () => {
-          const data = null
-          if (data && data.records) {
-            // TO DO 静态缓存precision
-            await Promise.all(
-              data.records.map((i) => {
-                const cfgItem = this.assetConfig[i.asset]
-                i.precision = cfgItem ? parseInt(cfgItem.precision) : 6
-              })
-            )
-          }
-          return data
-        },
-        [],
-        { user: true }
+
+      const data = await getUserRecords(
+        this.username,
+        this.fundtype,
+        this.asset,
+        this.size,
+        this.offset
       )
-        .then((data) => {
-          this.history = data.records
-          this.total = data.total
-          // this.page = Math.floor((this.total - data.total) / this.size) + 1;
+
+      if (data && data.records) {
+        // TO DO  静态缓存  precision
+        data.records = data.records.map((i) => {
+          const cfgItem = this.assetConfig[i.asset]
+          i.precision = cfgItem ? parseInt(cfgItem.precision) : 6
+          return i
         })
-        .catch((e) => {
-          this.history = null
-        })
-        .finally(() => {
-          this.isLoading = false
-        })
+        this.history = data.records
+        this.total = data.total
+      }
+      this.isLoading = false
     },
     async onPageChanged(value) {
       this.offset = Math.min((value - 1) * this.size, this.total)
@@ -247,7 +238,7 @@ export default {
 
 <style lang="scss" scoped>
 .addr-row {
-  width: 170px;
+  /* width: 170px; */
   overflow: hidden;
   text-overflow: ellipsis;
 }

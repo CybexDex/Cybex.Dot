@@ -9,7 +9,6 @@
       </v-flex>
       <v-flex xs12 class="select-head mb-3">
         <v-menu
-          v-model="showSelection"
           content-class="selection-popover"
           :open-on-click="false"
           :close-on-content-click="false"
@@ -22,11 +21,7 @@
                 class="ic-asset-icon-bg asset-icon-bg mr-0"
               >
                 {{
-                  selected.cybid
-                    | coinName(coinMap)
-                    | shorten
-                    | shortenContest
-                    | firstLetterCoin
+                  selected.cybid | shorten | shortenContest | firstLetterCoin
                 }}
               </div>
               <v-img
@@ -121,19 +116,13 @@
         <div v-if="!isTransfer" class="shortcut">
           <template v-for="(coin, index) in coins">
             <v-chip
-              v-if="
-                fullList.findIndex(
-                  (i) =>
-                    i[`${fundtype}Switch`] &&
-                    (coinMap[i.cybid] || '').indexOf(coin) > -1
-                ) > -1
-              "
+              v-if="fullList.findIndex((i) => i[`${fundtype}Switch`]) > -1"
               ref="shortcut"
               :key="index"
               class="select_coin"
-              :selected="selectedCoin(index)"
+              :input-value="selectedCoin === index"
               label
-              @click="onSelected(prefix + coin)"
+              @click="onSelected(coin)"
               >{{ coin }}</v-chip
             >
           </template>
@@ -146,9 +135,9 @@
         <div class="notice-wrap">
           <template v-if="!isTransfer">
             <div class="img-link mt-3 mb-2">
-              <a v-if="icon.link" @click="open(icon.link)">
+              <a v-if="icon.hashLink" @click="open(icon.hashLink)">
                 <v-img
-                  :src="icon.img_url"
+                  :src="icon.imgURL"
                   width="48"
                   max-width="48"
                   :height="48"
@@ -156,7 +145,7 @@
               </a>
               <v-img
                 v-else
-                :src="icon.img_url"
+                :src="icon.imgURL"
                 width="48"
                 max-width="48"
                 :height="48"
@@ -190,13 +179,13 @@
             >
               {{ item.text }}
             </p>
-            <span class="add mt-3"
-              >{{
-                $t(`info.go_${fundtype}_history`, {
-                  url: `javascript:jumpTo('/fund/history')`
-                })
-              }}
-            </span>
+            <i18n :path="fundPath" tag="span" class="add mt-3">
+              <template v-slot:action>
+                <a :href="`javascript:jumpTo('/fund/history')`">{{
+                  $t('title.history')
+                }}</a>
+              </template>
+            </i18n>
           </div>
           <div v-else class="mt-4 mb-4 notice-local">
             <p class="add">{{ $t('info.transfer_notice_title') }}</p>
@@ -212,6 +201,23 @@
           </div>
         </div>
       </v-flex>
+      <v-flex xs12 class="mt-5">
+        <h3 class="mb-4">{{ $t(`sub_title.record_${fundtype}`) }}</h3>
+        <template v-if="!isTransfer">
+          <div v-if="islocked" class="desc-wrap">
+            <cybex-btn
+              small
+              class="mt-2 text-capitalize"
+              @click="onUnlockClicked"
+              >{{ $t('button.unlock_view') }}</cybex-btn
+            >
+          </div>
+          <history-list v-else :fundtype="fundtype" :asset="assetInfo.name" />
+        </template>
+        <template v-else>
+          <transfer-history-list />
+        </template>
+      </v-flex>
     </v-layout>
   </div>
 </template>
@@ -222,7 +228,10 @@ import { filter, map, values, assign } from 'lodash'
 import utils from '~/components/mixins/utils'
 
 export default {
-  components: {},
+  components: {
+    HistoryList: () => import('~/components/HistoryList.vue'),
+    TransferHistoryList: () => import('~/components/TransferHistoryList.vue')
+  },
   mixins: [utils],
   props: {
     fundtype: {
@@ -230,10 +239,15 @@ export default {
       default: 'deposit'
     }
   },
+  asyncData({ params, store }) {
+    return {
+      cointype: params.cointype || ''
+    }
+  },
   data() {
     return {
       querystr: '',
-      coins: ['BTC', 'ETH', 'EOS', 'USDT'],
+      coins: ['ETH'],
       selected: null,
       records: [],
       page: 0,
@@ -254,8 +268,18 @@ export default {
       locale: 'i18n/locale',
       shortcut: 'i18n/shortcut',
       username: 'auth/username',
-      islocked: 'auth/islocked'
+      islocked: 'auth/islocked',
+      assetConfig: 'gateway/assetConfigBySymbol'
     }),
+    cointype() {
+      return this.$route.params.cointype
+    },
+    selectedCoin() {
+      return this.coins.findIndex((i) => i === this.cointype)
+    },
+    fundPath() {
+      return `info.go_${this.fundtype}_history`
+    },
     transfer() {
       return map(
         filter(
@@ -294,10 +318,7 @@ export default {
       return filter(
         this.fullList,
         (item) =>
-          (!this.querystr ||
-            (this.coinMap[item.cybid] || '').includes(
-              this.querystr.toUpperCase()
-            )) &&
+          (!this.querystr || item.name.includes(this.querystr.toUpperCase())) &&
           (this.fundtype === 'transfer' || item[`${this.fundtype}Switch`]) &&
           (!this.selected || this.selected.cybid !== item.cybid)
       )
@@ -347,11 +368,6 @@ export default {
     }
   },
   methods: {
-    selectedCoin(idx) {
-      return (
-        this.coins.findIndex((i) => this.prefix + i === this.cointype) === idx
-      )
-    },
     onOpenSelect() {
       this.showSelection = !this.showSelection
     },
@@ -360,14 +376,24 @@ export default {
     },
     ensureSelected(list, cointype) {
       if (list && !this.selected) {
-        this.selected = list.find(
-          (item) =>
-            (this.customAssetsMap[item.cybid] || this.coinMap[item.cybid]) ===
-            cointype
-        )
+        this.selected = list.find((item) => item.name === cointype)
       }
     },
-    async loadOpInfo(cointype) {},
+    loadOpInfo(cointype) {
+      this.icon = this.assetConfig[this.cointype]
+      // const handler =
+      //   this.fundtype === 'withdraw'
+      //     ? this.cybexjs.withdraw_infos
+      //     : this.cybexjs.deposit_infos
+      // try {
+      //   const param = this.coinMapInvert[this.cointype]
+      //   const datas = await this.$callmsg(handler, param)
+      //   this.icon = datas[`icon_${this.shortcut}`]
+      //   this.msg = datas[`msg_${this.shortcut}`]
+      //   this.notice = datas[`notice_${this.shortcut}`]
+      // } catch (e) {
+      // }
+    },
     onSelected(val) {
       if (!val) return
       const coinname =
@@ -383,7 +409,7 @@ export default {
       this.$i18n.jumpTo(`/fund/${this.fundtype}/${coinname}`)
     },
     onUnlockClicked() {
-      this.$toggleLock()
+      this.$toggleLock(true)
     }
   }
 }

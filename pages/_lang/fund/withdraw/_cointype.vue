@@ -3,20 +3,20 @@
     <template v-if="assetInfo.withdrawSwitch">
       <v-form ref="form">
         <v-flex xs12 class="form-field">
+          <span>
+            <v-icon size="16" class="mr-2">ic-balance_wallet</v-icon>
+            {{ balance | roundDigits(precision) }} {{ coinname }}
+          </span>
           <v-text-field
             v-model="address"
             no-message
             :label="$t('form_label.withdraw_addr')"
-            middle
+            solo
             :placeholder="$t('placeholder.enter_address')"
             clearable
             append-icon="fa-map-marker-alt"
             @input="onAddressChanged"
           >
-            <span slot="append-label">
-              <v-icon size="16" class="mr-2">ic-balance_wallet</v-icon>
-              {{ balance | roundDigits(precision) }} {{ coinname }}
-            </span>
             <!-- <div v-slot:append bottom>
               <v-menu>
                 <template v-slot:activator="{ on }">
@@ -50,7 +50,7 @@
           <v-text-field
             v-model="memo"
             no-message
-            middle
+            solo
             clearable
             @input="onMemoChanged"
           >
@@ -91,14 +91,14 @@
             <span class="fee-label">{{ $t('form_label.transfer_fee') }}</span>
             <span class="fee-amount"
               >{{ cybexfee.amount | roundDigits(cybexPrecision) }}
-              {{ cybexfee.asset_id | coinName(coinMap) }}</span
+              {{ cybexfee.asset_id }}</span
             >
           </p>
           <p class="mb-3">
             <span class="fee-label">{{ $t('form_label.gateway_fee') }}</span>
             <span class="fee-amount"
               >{{ gatewayfee.amount | roundDigits(precision) }}
-              {{ gatewayfee.asset_id | coinName(coinMap) | shorten }}</span
+              {{ gatewayfee.asset_id | shorten }}</span
             >
           </p>
           <p>
@@ -107,7 +107,7 @@
             >
             <span class="fee-amount large"
               >{{ realAmount | roundDigits(precision) }}
-              {{ gatewayfee.asset_id | coinName(coinMap) | shorten }}</span
+              {{ gatewayfee.asset_id | shorten }}</span
             >
           </p>
         </v-flex>
@@ -161,14 +161,14 @@
               }}</span>
               <span class="confirm-num"
                 >&nbsp;{{ cybexfee.amount | roundDigits(cybexPrecision) }}
-                {{ cybexfee.asset_id | coinName(coinMap) }}</span
+                {{ cybexfee.asset_id }}</span
               >
             </v-flex>
             <v-flex xs12>
               <span class="left-label">{{ $t('form_label.gateway_fee') }}</span>
               <span class="confirm-num"
                 >&nbsp;{{ assetInfo.withdrawFee | roundDigits(precision) }}
-                {{ gatewayfee.asset_id | coinName(coinMap) | shorten }}</span
+                {{ gatewayfee.asset_id | shorten }}</span
               >
             </v-flex>
             <v-flex xs12 class="receive-amount mt-3">
@@ -204,6 +204,8 @@
 import { mapGetters } from 'vuex'
 import { debounce } from 'lodash'
 import utils from '~/components/mixins/utils'
+import { verifyAddress } from '~/lib/gateway-client'
+import CybexDotClient from '~/lib/CybexDotClient.js'
 
 export default {
   components: {
@@ -240,13 +242,15 @@ export default {
       memoChecked: false,
       precision: 0,
       cybexPrecision: 0,
-      isMemoValid: false,
-      assetConfig: []
+      isMemoValid: false
     }
   },
   computed: {
     ...mapGetters({
       username: 'auth/username',
+      accountId: 'auth/address',
+      assetConfig: 'gateway/assetConfigBySymbol',
+
       islocked: 'auth/islocked',
       showUnlock: 'showUnlock',
       localeShort: 'i18n/shortcut'
@@ -332,7 +336,7 @@ export default {
         this.showConfirm = true
       } else {
         this.readyToSend = true
-        this.$toggleLock()
+        this.$toggleLock(true)
       }
     },
     resetFee() {
@@ -383,8 +387,11 @@ export default {
         }
       }
     },
-    async calFee(amount, cointype) {
-      // try {
+    calFee(amount, cointype) {
+      this.realAmount = amount
+
+      this.precision = this.assetInfo.precision
+      this.withdrawAmount = amount * 10 ** this.assetInfo.precision
     },
     async validateMemo() {
       this.memo = this.memo.trim()
@@ -400,24 +407,42 @@ export default {
       this.memoChecked = true
       await this.calFee(this.amount, this.cointype)
     },
-    fetchBalance(cointype) {
+    async fetchBalance(cointype) {
       try {
+        const balance = await CybexDotClient.getBalance(
+          this.assetInfo.cybid,
+          this.accountId
+        )
+        this.precision = this.assetInfo.precision
+        this.balance = balance
+          ? balance.freeBalance / 10 ** this.assetInfo.precision
+          : null
       } catch (e) {
         // console.log('some error when fetch balance')
       }
     },
-    validateAddress() {
+    async validateAddress() {
       this.addressChecked = false
       try {
+        const result = await verifyAddress(this.assetInfo.name, this.address)
+        this.isAddressValid = result.valid
       } catch (e) {
         this.isAddressValid = false
       }
       this.addressChecked = true
     },
-    sendTx() {
+    async sendTx() {
       try {
         this.inSendTx = true
-        const ret = null
+        const memo = `${this.assetInfo.withdrawPrefix}:${this.finalAddress}`
+
+        const ret = await CybexDotClient.transfer(
+          this.assetInfo.cybid,
+          this.assetInfo.gatewayAccount,
+          this.withdrawAmount,
+          memo
+        )
+
         // console.log('==== send tx result: ', ret, this.finalAddress)
         if (ret) {
           this.$message({

@@ -5,7 +5,7 @@
   "author": "koofrank",
   "private": true,
   "scripts": {
-    "dev": "cross-env NUXT_PORT=3006 nuxt",
+    "dev": "cross-env NUXT_PORT=3009 nuxt",
     "build": "nuxt build",
     "build-spa": "nuxt build --spa",
     "start": "cross-env NUXT_HOST=0.0.0.0 NUXT_PORT=3333 nuxt start",
@@ -30,6 +30,7 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "nuxt": "^2.2.13",
+    "qrcode": "^1.4.4",
     "sha256": "^0.2.0",
     "vue-i18n": "^8.15.3",
     "vue2-filters": "^0.9.1",

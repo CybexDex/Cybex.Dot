@@ -44,11 +44,12 @@
           <canvas id="qrcode" width="310" height="310" />
           <v-text-field
             v-model="address"
-            middle
-            :copy-icon="'ic-copy not-narrow'"
-            :copy-icon-cb="onCopied"
+            solo
+            height="48"
+            :append-outer-icon="'ic-copy'"
             class="input-text"
             readonly
+            @click:append-outer="onCopied"
           />
         </template>
         <div v-else class="text-center unlock-tip">
@@ -65,6 +66,8 @@
 <script>
 import { mapGetters } from 'vuex'
 import clipboard from 'clipboard-polyfill'
+import QRCode from 'qrcode'
+import { getDepositAddress } from '~/lib/gateway-client'
 
 export default {
   components: {},
@@ -80,13 +83,15 @@ export default {
     return {
       address: '',
       message: '',
-      memo: '',
-      assetConfig: []
+      memo: ''
     }
   },
   computed: {
     ...mapGetters({
       username: 'auth/username',
+      accountId: 'auth/address',
+      assetConfig: 'gateway/assetConfigBySymbol',
+
       localeShort: 'i18n/shortcut',
       islocked: 'auth/islocked'
     }),
@@ -114,19 +119,34 @@ export default {
     },
     async islocked(newval) {
       if (!newval) {
-        await this.refreshAddress()
+        await this.refreshAddress(this.cointype)
       }
     }
   },
   async mounted() {
     if (!this.islocked) {
-      await this.refreshAddress()
+      await this.refreshAddress(this.cointype)
     }
   },
   methods: {
-    refreshAddress(cointype) {
-      // try {
-      // } catch (e) { console.log(e) }
+    async refreshAddress(cointype) {
+      const asset = await getDepositAddress(this.accountId, cointype)
+      const address = asset.address
+      if (this.needShowMemo) {
+        const [addr, memo] = address.replace(']', '').split('[')
+        this.address = addr
+        this.memo = memo
+      } else {
+        this.address = address
+        const canvasElem = document.getElementById('qrcode')
+
+        if (canvasElem) {
+          QRCode.toCanvas(canvasElem, address, {
+            margin: 1,
+            width: 310
+          })
+        }
+      }
     },
     onCopied(item) {
       clipboard.writeText(item)
