@@ -46,6 +46,7 @@ import { mapGetters } from 'vuex'
 import moment from 'moment-timezone'
 import { Datafeed } from './datafeed.js'
 import utils from '~/components/mixins/utils'
+import { widget } from '~/assets/tradingview/charting_library.min'
 
 export default {
   components: {
@@ -239,7 +240,7 @@ export default {
       }
     }
 
-    this.tvWidget = new window.TradingView.widget(widgetOptions) // eslint-disable-line new-cap
+    this.tvWidget = new widget(widgetOptions) // eslint-disable-line new-cap
     const averagePrecision = 8
     this.tvWidget.onChartReady(() => {
       this.isReady = true

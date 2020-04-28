@@ -25,8 +25,8 @@ export default {
   components: {
     appNav: () => import('~/components/AppNavigation.vue'),
     appFooter: () => import('~/components/AppFooter.vue')
-  }
-  // middleware: ['init-asset']
+  },
+  middleware: ['init-asset']
 }
 </script>
 

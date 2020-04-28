@@ -42,4 +42,8 @@ export const mutations = {
   }
 }
 
-export const actions = {}
+export const actions = {
+  nuxtServerInit({ commit }, { req, $winstonLog }) {
+    $winstonLog.info(req)
+  }
+}
