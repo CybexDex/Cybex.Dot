@@ -3,19 +3,21 @@
     <template v-if="assetInfo.withdrawSwitch">
       <v-form ref="form">
         <v-flex xs12 class="form-field">
-          <span>
-            <v-icon size="16" class="mr-2">ic-balance_wallet</v-icon>
-            {{ balance | roundDigits(precision) }} {{ coinname }}
-          </span>
+          <p class="balance d-flex justify-space-between">
+            <span class="label">{{ $t('form_label.withdraw_addr') }}</span>
+            <span>
+              <v-icon size="16" class="mr-2">ic-balance_wallet</v-icon>
+              {{ balance | roundDigits(precision) }} {{ coinname }}</span
+            >
+          </p>
           <v-text-field
-            v-model="address"
-            no-message
-            :label="$t('form_label.withdraw_addr')"
+            v-model="withdrawAddress"
             solo
             :placeholder="$t('placeholder.enter_address')"
+            :error-messages="errors"
             clearable
             append-icon="fa-map-marker-alt"
-            @input="onAddressChanged"
+            @click:clear="errors = ''"
           >
             <!-- <div v-slot:append bottom>
               <v-menu>
@@ -38,13 +40,6 @@
               </v-menu>
             </div> -->
           </v-text-field>
-          <p class="error-msg">
-            {{
-              !isAddressValid && addressChecked
-                ? $t('validation.invalid_address', { cointype: coinname })
-                : ''
-            }}
-          </p>
         </v-flex>
         <v-flex v-if="needShowMemo" xs12 class="form-field">
           <v-text-field
@@ -242,7 +237,9 @@ export default {
       memoChecked: false,
       precision: 0,
       cybexPrecision: 0,
-      isMemoValid: false
+      isMemoValid: false,
+      errors: '',
+      withdrawAddress: null
     }
   },
   computed: {
@@ -259,7 +256,7 @@ export default {
       return (
         this.addressChecked &&
         this.isAddressValid &&
-        this.address &&
+        this.withdrawAddress &&
         this.amountChecked &&
         this.isAmountValid &&
         (!this.memo || this.memoChecked)
@@ -275,7 +272,9 @@ export default {
       return this.assetInfo.useMemo
     },
     finalAddress() {
-      return this.needShowMemo ? `${this.address}[${this.memo}]` : this.address
+      return this.needShowMemo
+        ? `${this.withdrawAddress}[${this.memo}]`
+        : this.withdrawAddress
     },
     assetInfo() {
       return this.assetConfig[this.cointype] || {}
@@ -285,9 +284,16 @@ export default {
     }
   },
   watch: {
+    withdrawAddress(v) {
+      if (v && v.length > 0) {
+        this.onAddressChanged()
+      } else {
+        this.errors = ''
+      }
+    },
     async username(val) {
       if (!val) return
-      this.address = ''
+      this.withdrawAddress = ''
       // this.showConfirm = false;
       this.resetFee()
       // await this.checkEnable();
@@ -424,12 +430,21 @@ export default {
     async validateAddress() {
       this.addressChecked = false
       try {
-        const result = await verifyAddress(this.assetInfo.name, this.address)
+        const result = await verifyAddress(
+          this.assetInfo.name,
+          this.withdrawAddress
+        )
+
         this.isAddressValid = result.valid
       } catch (e) {
         this.isAddressValid = false
       }
       this.addressChecked = true
+
+      this.errors =
+        this.withdrawAddress && !this.isAddressValid && this.addressChecked
+          ? this.$t('validation.invalid_address', { cointype: this.coinname })
+          : ''
     },
     async sendTx() {
       try {
@@ -450,7 +465,7 @@ export default {
           })
           this.$nextTick(async () => {
             this.showConfirm = false
-            this.address = ''
+            this.withdrawAddress = ''
             this.resetFee()
             await this.fetchBalance(this.cointype)
             // this.inSendTx = false;
@@ -485,6 +500,29 @@ export default {
 <style lang="scss">
 @import '~assets/style/_fonts/_font_mixin';
 @import '~assets/style/_vars/_colors';
+
+.v-messages__message {
+  line-height: normal !important;
+}
+.theme--dark.v-text-field:hover > .v-input__control > .v-input__slot,
+.theme--dark.v-text-field.v-input--is-focused
+  > .v-input__control
+  > .v-input__slot {
+  background-color: #293246 !important;
+}
+
+.v-form .label {
+  @include f-cybex-style(heavy);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.v-form .balance {
+  @include f-cybex-style(heavy);
+  font-size: 14px;
+  color: #78819a;
+  line-height: 14px;
+}
 
 .confirm-panel {
   // width: 402px;

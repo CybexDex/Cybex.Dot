@@ -263,7 +263,8 @@ export default {
       locale: 'i18n/locale',
       localeShort: 'i18n/shortcut',
       symbol: 'i18n/symbol',
-      accountId: 'auth/address'
+      accountId: 'auth/address',
+      assetConfigBySymbol: 'gateway/assetConfigBySymbol'
     }),
 
     itemDatas() {
@@ -324,12 +325,12 @@ export default {
     onExchangeClicked() {},
     async setupAssetList() {
       const balances = await CybexDotClient.getAllBalance(this.accountId)
-
       const list = this.assets.map((asset) => {
+        const gwConfig = this.assetConfigBySymbol[asset.name] || {}
         const data = {
           isTop: 0,
-          depositSwitch: true,
-          withdrawSwitch: true,
+          depositSwitch: gwConfig.depositSwitch,
+          withdrawSwitch: gwConfig.withdrawSwitch,
           whyNotWithdraw: null,
           whyNotDeposit: null,
           balance: null,

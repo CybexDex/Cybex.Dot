@@ -384,6 +384,29 @@ export default {
 <style lang="scss">
 @import '~/assets/style/_vars/_colors';
 @import '~/assets/style/_fonts/_font_mixin';
+
+input:-webkit-autofill::first-line {
+  font-size: 12px;
+  @include f-cybex-style(medium);
+}
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-animation: autofill-fix 1s infinite;
+  -webkit-text-fill-color: white;
+  caret-color: white !important;
+  font-size: 12px;
+}
+
+@-webkit-keyframes autofill-fix {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
 .theme--dark.v-tabs .v-tab--active:hover::before,
 .theme--dark.v-tabs .v-tab--active::before {
   opacity: 0;
