@@ -27,7 +27,7 @@
     "file-saver": "^2.0.2",
     "jdenticon": "^2.2.0",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.27",
     "nuxt": "^2.2.13",
     "nuxt-winston-log": "^1.1.0",
